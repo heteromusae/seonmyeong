@@ -221,7 +221,7 @@
                 <div>
                     <h3 class="font-bold text-gray-900 mb-1">✨ 상단 툴바 기능</h3>
                     <p><b>실행 취소 / 되돌리기:</b> 화살표 버튼을 통해 작업 내역을 되돌릴 수 있습니다.<br>
-                    <b>M↓ 마크다운:</b> *내용* 형태로 입력된 텍스트를 연하고 기울어진 폰트로 렌더링합니다.</p>
+                    <b>M↓ 마크다운:</b> *(내용)* 형태로 입력된 텍스트를 연하고 기울어진 폰트로 렌더링합니다.</p>
                 </div>
                 <div>
                     <h3 class="font-bold text-gray-900 mb-1">📸 이미지 저장 및 자동 자르기</h3>
@@ -480,42 +480,12 @@
                 </div>
 
                 <!-- ★ 수정된 HTML/히든 블록 일괄 제거 버튼 -->
-                <div class="space-y-4">
-            <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider">웹 서식 정리</h3>
-            <select id="htmlCleanMode" class="w-full border border-gray-300 rounded p-2 text-xs">
-                <option value="none">기능 사용 안 함</option>
-                <option value="keepText">태그만 제거 (내용 보존)</option>
-                <option value="removeFull">태그 및 내용 전체 삭제</option>
-            </select>
-            <button onclick="applyHtmlCleaning()" class="w-full bg-indigo-600 text-white py-2 rounded text-xs font-bold">정리하기</button>
-        </div>
-    </aside> 
-
-    <script>
-        function applyHtmlCleaning() {
-            const editor = document.getElementById('editor');
-            const mode = document.getElementById('htmlCleanMode').value;
-            if (mode === 'none') return; 
-
-            let text = editor.innerHTML; 
-
-            if (mode === 'removeFull') {
-                // 주석, 스타일, 스크립트, 코드블럭 및 내용 전체 삭제
-                text = text.replace(/<!--[\s\S]*?-->/g, '');
-                text = text.replace(/<(style|script|pre|code)[^>]*>[\s\S]*?<\/\1>/gi, '');
-                text = text.replace(/<[^>]+>/g, '');
-            } else if (mode === 'keepText') {
-                // <br>은 줄바꿈으로, 나머지 태그 제거
-                text = text.replace(/<br\s*\/?>/gi, '\n');
-                text = text.replace(/<[^>]+>/g, '');
-            } 
-
-            editor.innerText = text;
-        } 
-
-        function openHelp() { document.getElementById('helpModal').classList.remove('hidden'); }
-       function closeHelp() { document.getElementById('helpModal').classList.add('hidden'); }
-
+                <div class="mt-3">
+                    <label class="block text-xs font-medium mb-1 text-gray-700">웹 서식 정리</label>
+                    <button onclick="cleanHtmlAndHidden()" class="w-full bg-gray-50 hover:bg-gray-100 text-gray-600 border border-gray-200 font-bold py-1.5 px-3 rounded text-xs transition">
+                        HTML 코드 및 히든 블록 제거
+                    </button>
+                </div>
             </div>
 
             <hr class="border-gray-100">
@@ -1228,6 +1198,5 @@
     </script>
 </body>
 </html>
-
 
 

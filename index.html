@@ -141,16 +141,14 @@
         ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #6b7280; }
 
-        /* 폰트 클래스 */
         .font-noto-sans { font-family: 'Noto Sans KR', sans-serif; }
         
-        /* 에디터 기본 설정 (소설 발췌용) */
         #editor {
             white-space: pre-wrap;      
             overflow-wrap: break-word;  
             word-break: keep-all;       
             text-align: justify;        
-            box-sizing: border-box; /* 패딩 계산 완벽 대칭 보장 */
+            box-sizing: border-box; 
         }
         
         #editor div, #editor p, #editor span, #editor b, #editor i, #editor strong, #editor em {
@@ -158,7 +156,6 @@
         }
         #editor p { margin: 0; min-height: 1em; }
         
-        /* 마크다운 기본 스타일링 */
         #editor h1, #editor h2, #editor h3 { font-weight: bold; margin: 0.5em 0; line-height: 1.4; }
         #editor h1 { font-size: 1.5em; }
         #editor h2 { font-size: 1.25em; }
@@ -166,10 +163,8 @@
         #editor ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 0.5em; }
         #editor ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 0.5em; }
         
-        /* 마크다운 강조(기울기+연하게) 스타일 */
         #editor em { font-style: italic; opacity: 0.6; }
 
-        /* 툴바 버튼 */
         .toolbar-btn {
             display: inline-flex; align-items: center; justify-content: center;
             width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0;
@@ -177,7 +172,6 @@
         }
         .toolbar-btn:hover, .toolbar-btn.active { background-color: #e5e7eb; color: #111827; }
 
-        /* 컬러 팔레트 */
         .color-swatch {
             width: 24px; height: 24px; border-radius: 50%;
             border: 2px solid #e5e7eb; cursor: pointer;
@@ -186,7 +180,6 @@
         .color-swatch:active { transform: scale(0.9); }
         .color-swatch.active { border-color: #4f46e5; outline: 2px solid #c7d2fe; }
 
-        /* 종이 질감 효과 */
         .paper-texture::after {
             content: "";
             position: absolute;
@@ -196,7 +189,6 @@
             z-index: 10;
         }
 
-        /* 캔버스 래퍼 */
         #export-wrapper {
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
             position: relative; 
@@ -206,6 +198,45 @@
     </style>
 </head>
 <body class="bg-gray-100 h-[100dvh] w-screen flex flex-col md:flex-row overflow-hidden font-noto-sans text-gray-800">
+
+    <!-- ★ 도움말 팝업 (모달) 수정됨 -->
+    <div id="helpModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 z-[110] flex justify-center items-center p-4">
+        <div class="bg-white rounded-lg w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200">
+                <h2 class="text-lg font-bold text-indigo-700 flex items-center gap-2">💡 사용 방법 및 기능 안내</h2>
+                <button onclick="closeHelp()" class="text-gray-400 hover:text-gray-600 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="p-5 overflow-y-auto text-sm text-gray-700 space-y-5 custom-scrollbar leading-relaxed">
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-1">📌 프리셋 관리 및 자동 저장</h3>
+                    <p>입력한 로그와 설정은 새로고침을 해도 로컬 스토리지에 자동 저장됩니다. 마음에 드는 폰트, 여백, 색상 설정 조합은 [새 프리셋으로 저장]을 눌러 언제든 다시 불러올 수 있습니다.</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-1">⚙️ 텍스트 자동 변환</h3>
+                    <p><b>일괄 변환:</b> 별표로 감싸지지 않은 일반 텍스트 문단에 지정한 따옴표를 입히고, 지문에 붙은 별표를 모두 삭제합니다.<br>
+                    <b>HTML/히든 블록 제거:</b> HTML 웹 태그를 모두 삭제하여 순수 텍스트로 정리합니다.</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-1">✨ 상단 툴바 기능</h3>
+                    <p><b>실행 취소 / 되돌리기:</b> 화살표 버튼을 통해 작업 내역을 되돌릴 수 있습니다.<br>
+                    <b>M↓ 마크다운:</b> *내용* 형태로 입력된 텍스트를 연하고 기울어진 폰트로 렌더링합니다.</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-1">📸 이미지 저장 및 자동 자르기</h3>
+                    <p>이미지 비율을 선택한 후 [발췌본 만들기]를 클릭하세요. [마지막 페이지 자동 자르기]가 켜져 있으면, 글이 끝나는 마지막 장에서 남는 잉여 공간을 잘라내 최종 출력본이 완성됩니다.</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-1">✉️ 제작자 코멘트</h3>
+                    <p>문제 생기면 사이트 내립니다…. 부디 잘 써주시길 바라요 uu</p>
+                </div>
+            </div>
+            <div class="p-4 bg-gray-50 border-t border-gray-200 text-center">
+                <button onclick="closeHelp()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded shadow transition">확인</button>
+            </div>
+        </div>
+    </div>
 
     <!-- 미리보기 모달 -->
     <div id="previewModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-95 z-[100] flex flex-col">
@@ -233,9 +264,12 @@
             📖 로그 발췌 툴
             <span class="text-[11px] font-normal text-gray-400 tracking-wide mt-0.5">by @heteromusae</span>
         </h1>
-        <button onclick="toggleMobileMenu()" class="text-gray-600 p-1">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-        </button>
+        <div class="flex items-center gap-2">
+            <button onclick="openHelp()" class="text-xs font-bold text-gray-500 hover:text-gray-800 bg-gray-100 px-2 py-1.5 rounded transition">도움말</button>
+            <button onclick="toggleMobileMenu()" class="text-gray-600 p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+        </div>
     </div>
 
     <!-- 설정 사이드바 -->
@@ -245,13 +279,32 @@
                 📖 로그 발췌 툴
                 <span class="text-[11px] font-normal text-gray-400 tracking-wide">by @heteromusae</span>
             </h2>
-            <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-gray-500 hover:text-gray-800">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
+            <div class="flex items-center gap-2">
+                <button onclick="openHelp()" class="hidden md:block text-xs font-bold text-gray-500 hover:text-gray-800 bg-gray-100 px-2 py-1 rounded transition">도움말</button>
+                <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-gray-500 hover:text-gray-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
         </div>
 
-        <div class="p-5 flex flex-col gap-6 flex-1 overflow-y-auto">
+        <div class="p-5 flex flex-col gap-6 flex-1 overflow-y-auto custom-scrollbar">
             
+            <div class="space-y-4">
+                <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1">프리셋 관리</h3>
+                <div class="flex gap-2 items-center">
+                    <select id="presetSelect" class="flex-1 border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-indigo-500 bg-gray-50">
+                        <option value="">저장된 프리셋 없음</option>
+                    </select>
+                    <button onclick="loadPreset()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 font-bold py-1.5 px-2 rounded text-[10px] transition flex-shrink-0">불러오기</button>
+                    <button onclick="deletePreset()" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold py-1.5 px-2 rounded text-[10px] transition flex-shrink-0">삭제</button>
+                </div>
+                <button onclick="savePreset()" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 font-bold py-1.5 px-3 rounded text-xs transition">
+                    현재 설정 새 프리셋으로 저장
+                </button>
+            </div>
+            
+            <hr class="border-gray-100">
+
             <!-- 텍스트 설정 -->
             <div class="space-y-4">
                 <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1">서식 설정</h3>
@@ -314,12 +367,11 @@
                         <label class="block text-xs font-medium mb-1 text-gray-700">줄바꿈 기준</label>
                         <select id="globalWordBreak" class="w-full border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-indigo-500 bg-gray-50" onchange="updateGlobalStyles()">
                             <option value="keep-all" selected>띄어쓰기 단위</option>
-                            <option value="break-all">글자 단위 (꽉 채움)</option>
+                            <option value="break-all">글자 단위</option>
                         </select>
                     </div>
                 </div>
                 
-                <!-- ★ 여백 세부 조절 UI (수치 텍스트 표시 포함) -->
                 <div class="mt-4">
                     <div class="flex justify-between items-center mb-1.5">
                         <label class="block text-xs font-bold text-indigo-600">여백 (전체 조절) <span id="globalPaddingVal" class="text-gray-500 font-normal ml-1">40px</span></label>
@@ -426,6 +478,44 @@
                         *별표*로 감싸지지 않은 문단에 따옴표를 씌우고, 글 전체의 별표를 삭제합니다. (기존 색상 등 서식 초기화)
                     </p>
                 </div>
+
+                <!-- ★ 수정된 HTML/히든 블록 일괄 제거 버튼 -->
+                <div class="space-y-4">
+            <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider">웹 서식 정리</h3>
+            <select id="htmlCleanMode" class="w-full border border-gray-300 rounded p-2 text-xs">
+                <option value="none">기능 사용 안 함</option>
+                <option value="keepText">태그만 제거 (내용 보존)</option>
+                <option value="removeFull">태그 및 내용 전체 삭제</option>
+            </select>
+            <button onclick="applyHtmlCleaning()" class="w-full bg-indigo-600 text-white py-2 rounded text-xs font-bold">정리하기</button>
+        </div>
+    </aside> 
+
+    <script>
+        function applyHtmlCleaning() {
+            const editor = document.getElementById('editor');
+            const mode = document.getElementById('htmlCleanMode').value;
+            if (mode === 'none') return; 
+
+            let text = editor.innerHTML; 
+
+            if (mode === 'removeFull') {
+                // 주석, 스타일, 스크립트, 코드블럭 및 내용 전체 삭제
+                text = text.replace(/<!--[\s\S]*?-->/g, '');
+                text = text.replace(/<(style|script|pre|code)[^>]*>[\s\S]*?<\/\1>/gi, '');
+                text = text.replace(/<[^>]+>/g, '');
+            } else if (mode === 'keepText') {
+                // <br>은 줄바꿈으로, 나머지 태그 제거
+                text = text.replace(/<br\s*\/?>/gi, '\n');
+                text = text.replace(/<[^>]+>/g, '');
+            } 
+
+            editor.innerText = text;
+        } 
+
+        function openHelp() { document.getElementById('helpModal').classList.remove('hidden'); }
+       function closeHelp() { document.getElementById('helpModal').classList.add('hidden'); }
+
             </div>
 
             <hr class="border-gray-100">
@@ -477,7 +567,6 @@
         <!-- 상단 툴바 -->
         <header class="bg-white border-b border-gray-200 p-2 flex items-center gap-1 overflow-x-auto whitespace-nowrap shadow-sm z-10 flex-shrink-0">
             
-            <!-- 실행 취소 / 되돌리기 -->
             <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('undo')" title="실행 취소">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"></path></svg>
             </button>
@@ -486,7 +575,6 @@
             </button>
             <div class="w-px h-5 bg-gray-300 mx-1 flex-shrink-0"></div>
 
-            <!-- 기본 서식 -->
             <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('bold')" title="굵게"><b class="text-base font-serif">B</b></button>
             <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('italic')" title="기울임"><i class="text-base font-serif">I</i></button>
             <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('underline')" title="밑줄"><u class="text-base font-serif">U</u></button>
@@ -494,7 +582,6 @@
             
             <div class="w-px h-5 bg-gray-300 mx-1 flex-shrink-0"></div>
 
-            <!-- 정렬 -->
             <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('justifyLeft')" title="왼쪽 정렬"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="15" y1="12" x2="3" y2="12"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg></button>
             <button class="toolbar-btn active" onmousedown="event.preventDefault()" onclick="execCmd('justifyFull')" title="양쪽 정렬 (소설용)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="12" x2="3" y2="12"></line><line x1="21" y1="18" x2="3" y2="18"></line></svg></button>
             <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('justifyCenter')" title="가운데 정렬"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="19" y1="12" x2="5" y2="12"></line><line x1="21" y1="18" x2="3" y2="18"></line></svg></button>
@@ -502,7 +589,6 @@
 
             <div class="w-px h-5 bg-gray-300 mx-1 flex-shrink-0"></div>
             
-            <!-- 부분 글자색 퀵 픽커 -->
             <div class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded border border-gray-200 flex-shrink-0">
                 <span class="text-[10px] text-gray-500 mr-1">글자색</span>
                 <button class="w-4 h-4 rounded-full bg-[#ef4444]" onmousedown="event.preventDefault()" onclick="execCmd('foreColor', '#ef4444')"></button>
@@ -526,7 +612,6 @@
         <div class="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center items-start relative" id="scroll-area">
             
             <div id="export-wrapper" class="w-full max-w-[500px] bg-white transition-colors duration-200 relative">
-                
                 <div id="editor" contenteditable="true" class="w-full outline-none font-noto-serif" style="font-size: 10px; line-height: 1.8; color: #111111; padding: 40px;" spellcheck="false">이곳에 발췌할 로그를 붙여넣으세요. </div>
             </div>
         </div>
@@ -562,7 +647,15 @@
             sidebar.classList.toggle('flex');
         }
 
-        // ★ 여백 조절 동기화 함수 및 텍스트 갱신
+        // 도움말 팝업 연동
+        function openHelp() {
+            document.getElementById('helpModal').classList.remove('hidden');
+        }
+
+        function closeHelp() {
+            document.getElementById('helpModal').classList.add('hidden');
+        }
+
         function syncPadding(type, value) {
             if (type === 'all') {
                 document.getElementById('paddingTop').value = value;
@@ -582,7 +675,6 @@
             updateGlobalStyles();
         }
 
-        // ★ 여백 초기화 함수
         function resetPadding() {
             const defaultVal = 40;
             document.getElementById('globalPadding').value = defaultVal;
@@ -705,6 +797,32 @@
             editor.focus();
             document.execCommand('selectAll', false, null);
             document.execCommand('insertText', false, finalString);
+        }
+
+        // ★ HTML 및 히든 블록 제거 기능 업데이트
+        function cleanHtmlAndHidden() {
+            const editor = document.getElementById('editor');
+            
+            // 기존의 에디터 내 숨김 요소 우선 제거
+            const elements = editor.querySelectorAll('*');
+            elements.forEach(el => {
+                const style = window.getComputedStyle(el);
+                if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+                    el.remove();
+                }
+            });
+            
+            let rawText = editor.innerText;
+            
+            // 정규식을 통한 코드 및 숨겨진 내용 완벽 스윕
+            rawText = rawText.replace(/<!--[\s\S]*?-->/g, ''); // 주석 삭제
+            rawText = rawText.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ''); // 스타일 태그 안의 내용까지 삭제
+            rawText = rawText.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, ''); // 스크립트 삭제
+            rawText = rawText.replace(/<[^>]+>/g, ''); // 기타 모든 HTML 태그 및 인라인 스타일 등 코드 제거
+            
+            editor.focus();
+            document.execCommand('selectAll', false, null);
+            document.execCommand('insertText', false, rawText);
         }
 
         function applyMarkdown() {
@@ -987,13 +1105,129 @@
             }
             closePreview();
         }
+
+        function updatePresetList() {
+            const select = document.getElementById('presetSelect');
+            let presets = JSON.parse(localStorage.getItem('logPresets') || '{}');
+            select.innerHTML = '';
+            const keys = Object.keys(presets);
+            if (keys.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.text = "저장된 프리셋 없음";
+                select.appendChild(opt);
+            } else {
+                keys.forEach(key => {
+                    const opt = document.createElement('option');
+                    opt.value = key;
+                    opt.text = key;
+                    select.appendChild(opt);
+                });
+            }
+        }
+
+        function savePreset() {
+            const name = prompt("저장할 프리셋 이름을 입력하세요:");
+            if (!name) return;
+
+            const preset = {
+                font: document.getElementById('globalFont').value,
+                fontSize: document.getElementById('globalFontSize').value,
+                lineHeight: document.getElementById('globalLineHeight').value,
+                letterSpacing: document.getElementById('globalLetterSpacing').value,
+                wordBreak: document.getElementById('globalWordBreak').value,
+                padding: document.getElementById('globalPadding').value,
+                paddingTop: document.getElementById('paddingTop').value,
+                paddingBottom: document.getElementById('paddingBottom').value,
+                paddingLeft: document.getElementById('paddingLeft').value,
+                paddingRight: document.getElementById('paddingRight').value,
+                bgColor: currentBgColor,
+                textColor: currentTextColor,
+                texture: document.getElementById('paperTexture').checked,
+                ratio: document.getElementById('imageRatio').value,
+                quoteStyle: document.getElementById('quoteStyle').value,
+                autoTrim: document.getElementById('autoTrim').checked
+            };
+
+            let presets = JSON.parse(localStorage.getItem('logPresets') || '{}');
+            presets[name] = preset;
+            localStorage.setItem('logPresets', JSON.stringify(presets));
+            updatePresetList();
+            
+            document.getElementById('presetSelect').value = name;
+            alert(`'${name}' 프리셋이 저장되었습니다.`);
+        }
+
+        function loadPreset() {
+            const name = document.getElementById('presetSelect').value;
+            if (!name) return;
+
+            let presets = JSON.parse(localStorage.getItem('logPresets') || '{}');
+            const preset = presets[name];
+            if (!preset) return;
+
+            document.getElementById('globalFont').value = preset.font || "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+            document.getElementById('globalFontSize').value = preset.fontSize || "10px";
+            document.getElementById('globalLineHeight').value = preset.lineHeight || "1.8";
+            document.getElementById('globalLetterSpacing').value = preset.letterSpacing || "-3";
+            document.getElementById('globalWordBreak').value = preset.wordBreak || "keep-all";
+            
+            document.getElementById('globalPadding').value = preset.padding || "40";
+            document.getElementById('paddingTop').value = preset.paddingTop || "40";
+            document.getElementById('paddingBottom').value = preset.paddingBottom || "40";
+            document.getElementById('paddingLeft').value = preset.paddingLeft || "40";
+            document.getElementById('paddingRight').value = preset.paddingRight || "40";
+            
+            document.getElementById('globalPaddingVal').innerText = (preset.padding || "40") + 'px';
+            document.getElementById('paddingTopVal').innerText = (preset.paddingTop || "40") + 'px';
+            document.getElementById('paddingBottomVal').innerText = (preset.paddingBottom || "40") + 'px';
+            document.getElementById('paddingLeftVal').innerText = (preset.paddingLeft || "40") + 'px';
+            document.getElementById('paddingRightVal').innerText = (preset.paddingRight || "40") + 'px';
+
+            document.getElementById('paperTexture').checked = preset.texture || false;
+            document.getElementById('imageRatio').value = preset.ratio || "1.5";
+            document.getElementById('quoteStyle').value = preset.quoteStyle || "smart";
+            document.getElementById('autoTrim').checked = preset.autoTrim !== undefined ? preset.autoTrim : true;
+
+            applyCustomColor('bg', preset.bgColor || "#ffffff");
+            applyCustomColor('text', preset.textColor || "#111111");
+            
+            toggleTexture();
+        }
+
+        function deletePreset() {
+            const name = document.getElementById('presetSelect').value;
+            if (!name) return;
+            
+            if(confirm(`'${name}' 프리셋을 삭제하시겠습니까?`)) {
+                let presets = JSON.parse(localStorage.getItem('logPresets') || '{}');
+                delete presets[name];
+                localStorage.setItem('logPresets', JSON.stringify(presets));
+                updatePresetList();
+            }
+        }
         
        // 툴 초기화
        document.getElementById('customBgHex').value = currentBgColor;
        document.getElementById('customTextHex').value = currentTextColor;
        updateGlobalStyles();
+       updatePresetList();
+
+       window.addEventListener('DOMContentLoaded', () => {
+           const savedLog = localStorage.getItem('autoSavedLog');
+           const editorNode = document.getElementById('editor');
+           if (savedLog && savedLog.trim() !== '') {
+               editorNode.innerHTML = savedLog;
+           }
+
+           const observer = new MutationObserver(() => {
+               localStorage.setItem('autoSavedLog', editorNode.innerHTML);
+           });
+           observer.observe(editorNode, { childList: true, subtree: true, characterData: true });
+       });
     </script>
 </body>
 </html>
 
- 
+
+

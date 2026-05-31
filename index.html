@@ -184,16 +184,6 @@
         #editor.indent-active { text-indent: 0.5em; }
         #editor.indent-active div, #editor.indent-active p { text-indent: 0.5em; }
 
-        /* 형광펜 랜더링 오류 수정 - 형광펜이 글씨 위를 덮지 않고 더 밑에 칠해지도록 보정 */
-        #editor span[style*="background-color"], #editor font[style*="background-color"] {
-            line-height: inherit !important;
-            padding-top: 0 !important; /* 위쪽 여백을 없애서 렌더링 시 위로 쏠리는 현상 방지 */
-            padding-bottom: 0.4em !important; /* 아래쪽으로 배경 영역을 확장 */
-            border-radius: 3px;
-            box-decoration-break: clone;
-            -webkit-box-decoration-break: clone;
-        }
-
         .toolbar-btn {
             display: inline-flex; align-items: center; justify-content: center;
             width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0;
@@ -253,7 +243,7 @@
                 <div>
                     <h3 class="font-bold text-gray-900 mb-1">⚙️ 텍스트 자동 변환</h3>
                     <p><b>일괄 변환:</b> 별표로 감싸지지 않은 일반 텍스트 문단에 지정한 따옴표를 입히고, 지문에 붙은 별표를 모두 삭제합니다.<br>
-                    <b>웹 서식 정리:</b> 외부에서 복사한 HTML 코문을 정리하여 불필요한 태그와 스타일은 지우고 텍스트만 깔끔하게 보존합니다.</p>
+                    <b>웹 서식 정리:</b> 외부에서 복사한 HTML 코드를 정리하여 불필요한 태그와 스타일은 지우고 텍스트만 깔끔하게 보존합니다.</p>
                 </div>
                 <div>
                     <h3 class="font-bold text-gray-900 mb-1">✨ 상단 툴바 기능</h3>
@@ -701,21 +691,6 @@
                 <div id="toolbarPickr" title="자율 글자색 선택"></div>
                 <button id="lastCustomColorBtn" class="w-4 h-4 rounded shadow-sm border border-gray-300 ml-0.5" style="background-color: #9333ea;" onmousedown="event.preventDefault()" onclick="execCmd('foreColor', lastToolbarColor)" title="최근 선택한 자율색 적용"></button>
             </div>
-            
-            <div class="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded border border-gray-200 flex-shrink-0 toolbar-pickr ml-1">
-                <span class="text-[10px] text-gray-600 mr-1">형광펜</span>
-                
-                <!-- 상단 바 형광펜 색상 프리셋 축소 (3개: 핑크, 블루, 옐로우) -->
-                <button class="w-4 h-4 rounded-full bg-[#fbcfe8]" onmousedown="event.preventDefault()" onclick="updateHighlightColorBtn('rgba(249, 168, 212, 0.4)'); applyHighlight();" title="핑크"></button>
-                <button class="w-4 h-4 rounded-full bg-[#bfdbfe]" onmousedown="event.preventDefault()" onclick="updateHighlightColorBtn('rgba(147, 197, 253, 0.4)'); applyHighlight();" title="블루"></button>
-                <button class="w-4 h-4 rounded-full bg-[#fef08a]" onmousedown="event.preventDefault()" onclick="updateHighlightColorBtn('rgba(253, 224, 71, 0.4)'); applyHighlight();" title="옐로우"></button>
-
-                <div class="w-px h-3 bg-gray-300 mx-0.5"></div>
-                <div id="highlightPickr" title="형광펜 색상 선택"></div>
-                <button id="lastHighlightColorBtn" class="w-4 h-4 rounded shadow-sm border border-gray-300 flex items-center justify-center ml-0.5" style="background-color: rgba(249, 168, 212, 0.4);" onmousedown="event.preventDefault()" onclick="applyHighlight()" title="최근 선택한 형광펜 적용">
-                    <span class="text-[9px] font-bold text-gray-800">T</span>
-                </button>
-            </div>
 
             <div class="w-px h-5 bg-gray-300 mx-1 flex-shrink-0"></div>
 
@@ -744,7 +719,6 @@
         let currentBgColor = '#ffffff';
         let currentTextColor = '#111111';
         let lastToolbarColor = '#9333ea';
-        let lastHighlightColor = 'rgba(249, 168, 212, 0.4)'; // 기본값 핑크
         
         let gradColor1 = '#fbcfe8';
         let gradColor2 = '#93c5fd';
@@ -762,17 +736,7 @@
             }
         };
 
-        const highlightPickrConfig = {
-            theme: 'classic',
-            // Pickr 팔레트 기본 색상 프리셋도 3개로 축소 반영 (핑크, 블루, 옐로우)
-            swatches: ['rgba(249, 168, 212, 0.4)', 'rgba(147, 197, 253, 0.4)', 'rgba(253, 224, 71, 0.4)'],
-            components: {
-                preview: true, opacity: true, hue: true,
-                interaction: { hex: false, rgba: true, input: true, clear: false, save: true }
-            }
-        };
-
-        let bgPickr, textPickr, toolbarPickr, highlightPickr, gradPickr1, gradPickr2;
+        let bgPickr, textPickr, toolbarPickr, gradPickr1, gradPickr2;
 
         window.addEventListener('DOMContentLoaded', () => {
             // Pickr 초기화
@@ -790,14 +754,6 @@
                 document.getElementById('lastCustomColorBtn').style.backgroundColor = lastToolbarColor;
                 execCmd('foreColor', lastToolbarColor);
                 toolbarPickr.hide();
-            });
-
-            highlightPickr = Pickr.create({ el: '#highlightPickr', default: 'rgba(249, 168, 212, 0.4)', ...highlightPickrConfig });
-            highlightPickr.on('save', (color) => {
-                lastHighlightColor = color.toRGBA().toString();
-                document.getElementById('lastHighlightColorBtn').style.backgroundColor = lastHighlightColor;
-                applyHighlight();
-                highlightPickr.hide();
             });
 
             // 그라데이션 Pickr 초기화
@@ -1217,28 +1173,8 @@
             document.getElementById('editor').focus();
         }
 
-        function updateHighlightColorBtn(color) {
-            lastHighlightColor = color;
-            document.getElementById('lastHighlightColorBtn').style.backgroundColor = color;
-            if (highlightPickr) highlightPickr.setColor(color);
-        }
-
-        function applyHighlight() {
-            if (savedSelectionRange) {
-                const sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(savedSelectionRange);
-            }
-            
-            document.execCommand('styleWithCSS', false, true);
-            document.execCommand('hiliteColor', false, lastHighlightColor);
-            
-            document.getElementById('editor').focus();
-        }
-
         function clearFormatting() {
             document.execCommand('removeFormat', false, null);
-            document.execCommand('hiliteColor', false, 'transparent');
             document.execCommand('backColor', false, 'transparent');
             document.execCommand('foreColor', false, currentTextColor);
         }
@@ -1678,3 +1614,5 @@
     </script>
 </body>
 </html>
+
+

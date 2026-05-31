@@ -706,6 +706,7 @@
         <!-- 스크롤 본문 -->
         <div class="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center items-start relative" id="scroll-area">
             
+            <!-- 트랜지션 클래스 제거하여 빠른 반영을 돕도록 수정 -->
             <div id="export-wrapper" class="w-full max-w-[500px] bg-white relative">
                 <!-- 종이 질감 오버레이 -->
                 <div id="texture-overlay" class="absolute inset-0 z-10 pointer-events-none opacity-0"></div>
@@ -1132,6 +1133,12 @@
         function cleanHtmlAndHidden() {
             const editor = document.getElementById('editor');
             
+            // 1. DOM 내부의 details와 summary 노드를 자식 내용까지 통째로 삭제
+            const detailsElements = editor.querySelectorAll('details');
+            detailsElements.forEach(el => el.remove());
+            const summaryElements = editor.querySelectorAll('summary');
+            summaryElements.forEach(el => el.remove());
+            
             const elements = editor.querySelectorAll('*');
             elements.forEach(el => {
                 const style = window.getComputedStyle(el);
@@ -1141,6 +1148,10 @@
             });
             
             let rawText = editor.innerHTML;
+            
+            // 2. HTML 문자열 상태에서 정규식으로 통째로 삭제 (내용물 포함)
+            rawText = rawText.replace(/<details[^>]*>[\s\S]*?<\/details>/gi, '');
+            rawText = rawText.replace(/<summary[^>]*>[\s\S]*?<\/summary>/gi, '');
             
             // 줄바꿈 보존을 위해 변환
             rawText = rawText.replace(/<\/div>/gi, '\n');
@@ -1158,7 +1169,11 @@
             temp.innerHTML = rawText;
             let finalStr = temp.value;
             
-            finalStr = finalStr.replace(/```/g, ''); // 문자로만 남은 백틱도 삭제
+            // 3. 디코딩 후 텍스트로 숨어있던 태그까지 3차 확인 및 완전 삭제
+            finalStr = finalStr.replace(/<details[^>]*>[\s\S]*?<\/details>/gi, '');
+            finalStr = finalStr.replace(/<summary[^>]*>[\s\S]*?<\/summary>/gi, '');
+            finalStr = finalStr.replace(/```[\s\S]*?```/g, ''); // 문자로만 남은 백틱도 삭제
+            
             finalStr = finalStr.replace(/\n{3,}/g, '\n\n').trim();
             
             editor.focus();
@@ -1167,8 +1182,20 @@
         }
 
         function applyMarkdown() {
-            const editor = document.getElementById('editor');
-            let rawText = editor.innerText;
+            if (savedSelectionRange) {
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(savedSelectionRange);
+            }
+
+            const sel = window.getSelection();
+            // 선택된 텍스트가 없으면 경고창 후 작동 중지
+            if (!sel.rangeCount || sel.isCollapsed) {
+                alert("마크다운을 적용할 텍스트를 드래그하여 선택해주세요.");
+                return;
+            }
+
+            let rawText = sel.toString();
             if (!rawText.trim()) return;
 
             rawText = rawText.replace(/\*(.*?)\*/g, '<em>$1</em>');
@@ -1177,9 +1204,9 @@
             let html = marked.parse(rawText);
             
             html = html.replace(/<p>/g, '').replace(/<\/p>/g, '<br>');
+            if(html.endsWith('<br>')) html = html.slice(0, -4); // marked가 생성하는 마지막 줄바꿈 제거
 
-            editor.focus();
-            document.execCommand('selectAll', false, null);
+            // 선택된 영역에만 변환된 HTML 덮어쓰기 (요청 반영)
             document.execCommand('insertHTML', false, html);
         }
 

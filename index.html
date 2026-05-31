@@ -15,13 +15,15 @@
     <!-- Marked.js (마크다운 파싱용) -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
-    <!-- Google Fonts (불필요한 손글씨 폰트 제거) -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Nanum+Myeongjo:wght@400;700&family=Noto+Serif+KR:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Noto+Serif+KR:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
 
     <style>
-        /* ★ 추가된 Paperozi 커스텀 폰트 */
+        /* 추가된 폰트들 */
+        @import url('//fonts.googleapis.com/earlyaccess/nanummyeongjo.css');
+
         @font-face {
             font-family: 'Paperozi';
             src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-1Thin.woff2') format('woff2');
@@ -77,6 +79,61 @@
             font-display: swap;
         }
 
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Thin.woff2') format('woff2');
+            font-weight: 100;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-ExtraLight.woff2') format('woff2');
+            font-weight: 200;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Light.woff2') format('woff2');
+            font-weight: 300;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Regular.woff2') format('woff2');
+            font-weight: 400;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Medium.woff2') format('woff2');
+            font-weight: 500;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-SemiBold.woff2') format('woff2');
+            font-weight: 600;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-ExtraBold.woff2') format('woff2');
+            font-weight: 800;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Black.woff2') format('woff2');
+            font-weight: 900;
+            font-display: swap;
+        }
+
         /* 스크롤바 */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -87,13 +144,12 @@
         /* 폰트 클래스 */
         .font-noto-sans { font-family: 'Noto Sans KR', sans-serif; }
         
-        /* 에디터 기본 설정 (소설 발췌용) */
+        /* 에디터 기본 설정 */
         #editor {
             white-space: pre-wrap;      
             overflow-wrap: break-word;  
             word-break: keep-all;       
             text-align: justify;        
-            /* letter-spacing은 JS에서 동적 제어 */
         }
         
         #editor div, #editor p, #editor span, #editor b, #editor i, #editor strong, #editor em {
@@ -108,8 +164,6 @@
         #editor h3 { font-size: 1.1em; }
         #editor ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 0.5em; }
         #editor ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 0.5em; }
-        
-        #editor blockquote { margin-left: 0.67em; color: inherit; border: none; padding-left: 0; }
         
         /* 마크다운 강조(기울기+연하게) 스타일 */
         #editor em { font-style: italic; opacity: 0.6; }
@@ -202,7 +256,6 @@
                 <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1">서식 설정</h3>
                 
                 <div>
-                    <!-- ★ 폰트 선택: 고유 명칭 표기 및 새로운 폰트 반영 -->
                     <label class="block text-xs font-medium mb-1 text-gray-700">폰트</label>
                     <select id="globalFont" class="w-full border border-gray-300 rounded p-1.5 text-sm outline-none focus:border-indigo-500 bg-gray-50" onchange="updateGlobalStyles()">
                         <option value="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">시스템 기본 폰트</option>
@@ -215,6 +268,7 @@
                             <option value="'Noto Sans KR', sans-serif">Noto Sans KR</option>
                             <option value="'Gowun Dodum', sans-serif">Gowun Dodum</option>
                             <option value="'Paperozi', sans-serif">Paperozi</option>
+                            <option value="'Pretendard', sans-serif">Pretendard</option>
                         </optgroup>
                     </select>
                 </div>
@@ -275,8 +329,14 @@
                         <button class="color-swatch bg-[#ffffff] active" data-type="bg" data-color="#ffffff" onclick="setPaletteColor(this, 'bg')" title="기본 화이트"></button>
                         <button class="color-swatch bg-[#f8f6f2]" data-type="bg" data-color="#f8f6f2" onclick="setPaletteColor(this, 'bg')" title="연한 미색"></button>
                         <button class="color-swatch bg-[#f2efe9]" data-type="bg" data-color="#f2efe9" onclick="setPaletteColor(this, 'bg')" title="연한 회갈색"></button>
+                        <button class="color-swatch bg-[#e8ece6]" data-type="bg" data-color="#e8ece6" onclick="setPaletteColor(this, 'bg')" title="차분한 민트"></button>
+                        <button class="color-swatch bg-[#f0eaea]" data-type="bg" data-color="#f0eaea" onclick="setPaletteColor(this, 'bg')" title="더스티 로즈"></button>
+                        <button class="color-swatch bg-[#e6e6e8]" data-type="bg" data-color="#e6e6e8" onclick="setPaletteColor(this, 'bg')" title="소프트 쿨그레이"></button>
+
                         <button class="color-swatch bg-[#121212]" data-type="bg" data-color="#121212" onclick="setPaletteColor(this, 'bg')" title="다크 모드"></button>
                         <button class="color-swatch bg-[#1e293b]" data-type="bg" data-color="#1e293b" onclick="setPaletteColor(this, 'bg')" title="네이비 다크"></button>
+                        <button class="color-swatch bg-[#2c302e]" data-type="bg" data-color="#2c302e" onclick="setPaletteColor(this, 'bg')" title="딥 포레스트"></button>
+                        <button class="color-swatch bg-[#3a3335]" data-type="bg" data-color="#3a3335" onclick="setPaletteColor(this, 'bg')" title="다크 모카"></button>
                     </div>
                     <div class="flex items-center gap-2">
                         <input type="color" id="customBgColor" value="#ffffff" class="w-7 h-7 p-0 border-0 rounded cursor-pointer" oninput="applyCustomColor('bg', this.value)">
@@ -291,7 +351,13 @@
                         <button class="color-swatch bg-[#111111] active" data-type="text" data-color="#111111" onclick="setPaletteColor(this, 'text')"></button>
                         <button class="color-swatch bg-[#333333]" data-type="text" data-color="#333333" onclick="setPaletteColor(this, 'text')"></button>
                         <button class="color-swatch bg-[#555555]" data-type="text" data-color="#555555" onclick="setPaletteColor(this, 'text')"></button>
+                        <button class="color-swatch bg-[#4a4440]" data-type="text" data-color="#4a4440" onclick="setPaletteColor(this, 'text')" title="다크 브라운"></button>
+                        <button class="color-swatch bg-[#36454f]" data-type="text" data-color="#36454f" onclick="setPaletteColor(this, 'text')" title="차콜 블루"></button>
+                        <button class="color-swatch bg-[#7b756d]" data-type="text" data-color="#7b756d" onclick="setPaletteColor(this, 'text')" title="뮤트 브라운"></button>
+
                         <button class="color-swatch bg-[#e0e0e0]" data-type="text" data-color="#e0e0e0" onclick="setPaletteColor(this, 'text')"></button>
+                        <button class="color-swatch bg-[#f5f5f5]" data-type="text" data-color="#f5f5f5" onclick="setPaletteColor(this, 'text')" title="오프 화이트"></button>
+                        <button class="color-swatch bg-[#d1cac7]" data-type="text" data-color="#d1cac7" onclick="setPaletteColor(this, 'text')" title="라이트 베이지"></button>
                     </div>
                     <div class="flex items-center gap-2">
                         <input type="color" id="customTextColor" value="#111111" class="w-7 h-7 p-0 border-0 rounded cursor-pointer" oninput="applyCustomColor('text', this.value)">
@@ -302,6 +368,28 @@
                 <div class="flex items-center gap-2 mt-2 pt-2 border-t border-gray-100">
                     <input type="checkbox" id="paperTexture" class="rounded text-indigo-600 focus:ring-indigo-500" onchange="toggleTexture()">
                     <label for="paperTexture" class="text-xs font-medium text-gray-700 cursor-pointer">종이 질감(노이즈) 효과 적용</label>
+                </div>
+            </div>
+
+            <hr class="border-gray-100">
+
+            <!-- ★ 추가된 대사 자동 변환 기능 -->
+            <div class="space-y-4">
+                <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1">텍스트 변환</h3>
+                <div>
+                    <label class="block text-xs font-medium mb-1 text-gray-700">대사 자동 변환 (별표 제거)</label>
+                    <div class="flex gap-2">
+                        <select id="quoteStyle" class="flex-1 border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-indigo-500 bg-gray-50">
+                            <option value="smart">“ ” (둥근 따옴표)</option>
+                            <option value="straight">" " (직선 따옴표)</option>
+                        </select>
+                        <button onclick="formatDialogue()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 font-bold py-1.5 px-3 rounded text-xs transition flex-shrink-0">
+                            일괄 변환
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-1.5 leading-tight">
+                        *별표*로 감싸지지 않은 문단에 따옴표를 씌우고, 글 전체의 별표를 삭제합니다. (기존 색상 등 서식 초기화)
+                    </p>
                 </div>
             </div>
 
@@ -332,7 +420,6 @@
                     </select>
                 </div>
 
-                <!-- 여백 자동 자르기 기능 -->
                 <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
                     <input type="checkbox" id="autoTrim" class="rounded text-indigo-600 focus:ring-indigo-500" checked>
                     <label for="autoTrim" class="text-xs font-medium text-gray-700 cursor-pointer">마지막 페이지 여백 자동 자르기</label>
@@ -355,7 +442,6 @@
         <!-- 상단 툴바 -->
         <header class="bg-white border-b border-gray-200 p-2 flex items-center gap-1 overflow-x-auto whitespace-nowrap shadow-sm z-10 flex-shrink-0">
             
-            <!-- 실행 취소 / 되돌리기 -->
             <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('undo')" title="실행 취소">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"></path></svg>
             </button>
@@ -364,7 +450,6 @@
             </button>
             <div class="w-px h-5 bg-gray-300 mx-1 flex-shrink-0"></div>
 
-            <!-- 기본 서식 -->
             <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('bold')" title="굵게"><b class="text-base font-serif">B</b></button>
             <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('italic')" title="기울임"><i class="text-base font-serif">I</i></button>
             <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('underline')" title="밑줄"><u class="text-base font-serif">U</u></button>
@@ -372,7 +457,6 @@
             
             <div class="w-px h-5 bg-gray-300 mx-1 flex-shrink-0"></div>
 
-            <!-- 정렬 -->
             <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('justifyLeft')" title="왼쪽 정렬"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="15" y1="12" x2="3" y2="12"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg></button>
             <button class="toolbar-btn active" onmousedown="event.preventDefault()" onclick="execCmd('justifyFull')" title="양쪽 정렬 (소설용)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="12" x2="3" y2="12"></line><line x1="21" y1="18" x2="3" y2="18"></line></svg></button>
             <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('justifyCenter')" title="가운데 정렬"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="19" y1="12" x2="5" y2="12"></line><line x1="21" y1="18" x2="3" y2="18"></line></svg></button>
@@ -380,7 +464,6 @@
 
             <div class="w-px h-5 bg-gray-300 mx-1 flex-shrink-0"></div>
             
-            <!-- 부분 글자색 퀵 픽커 -->
             <div class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded border border-gray-200 flex-shrink-0">
                 <span class="text-[10px] text-gray-500 mr-1">글자색</span>
                 <button class="w-4 h-4 rounded-full bg-[#ef4444]" onmousedown="event.preventDefault()" onclick="execCmd('foreColor', '#ef4444')"></button>
@@ -403,10 +486,8 @@
         <!-- 스크롤 본문 -->
         <div class="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center items-start relative" id="scroll-area">
             
-            <!-- 문서 래퍼: max-w-[500px] 고정 유지 -->
             <div id="export-wrapper" class="w-full max-w-[500px] bg-white transition-colors duration-200 relative">
                 
-                <!-- 실제 에디터 -->
                 <div id="editor" contenteditable="true" class="w-full outline-none font-noto-serif" style="font-size: 10px; line-height: 1.8; color: #111111; padding: 40px;" spellcheck="false">이곳에 발췌할 로그를 붙여넣으세요. </div>
             </div>
         </div>
@@ -419,7 +500,6 @@
         
         let savedSelectionRange = null;
 
-        // 선택 영역 메모리 (컬러피커 문제 해결)
         document.addEventListener('selectionchange', () => {
             const sel = window.getSelection();
             if (sel.rangeCount > 0) {
@@ -513,6 +593,48 @@
             } else {
                 wrapper.classList.remove('paper-texture');
             }
+        }
+
+        // ★ 대사 자동 변환 기능 (별표 제거 + 따옴표 감싸기)
+        function formatDialogue() {
+            const editor = document.getElementById('editor');
+            const quoteStyle = document.getElementById('quoteStyle').value;
+            
+            let rawText = editor.innerText;
+            if (!rawText.trim()) return;
+
+            let lines = rawText.split('\n');
+            
+            let newLines = lines.map(line => {
+                let trimmed = line.trim();
+                if (!trimmed) return ''; // 빈 줄 유지
+                
+                // 문단이 별표로 완전히 감싸져 있는지 확인
+                let isWrapped = trimmed.startsWith('*') && trimmed.endsWith('*');
+                
+                // 줄 내의 모든 별표 제거
+                let cleaned = trimmed.replace(/\*/g, '').trim();
+                
+                if (!cleaned) return ''; // 별표만 있던 줄은 지움
+                
+                if (!isWrapped) {
+                    // 별표로 감싸져 있지 않았던 문단 -> 대사로 간주하여 따옴표 추가
+                    if (quoteStyle === 'smart') {
+                        return `“${cleaned}”`;
+                    } else {
+                        return `"${cleaned}"`;
+                    }
+                } else {
+                    // 별표로 감싸져 있던 문단 -> 행동 지문이므로 따옴표 없이 별표만 제거된 상태로 유지
+                    return cleaned;
+                }
+            });
+
+            const finalString = newLines.join('\n');
+
+            editor.focus();
+            document.execCommand('selectAll', false, null);
+            document.execCommand('insertText', false, finalString);
         }
 
         function applyMarkdown() {
@@ -801,5 +923,4 @@
     </script>
 </body>
 </html>
-
 

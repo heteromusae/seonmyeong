@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -488,6 +487,22 @@
 
                     <!-- 그라데이션 모드 영역 -->
                     <div id="gradientBgArea" class="hidden bg-gray-50 p-2.5 rounded border border-gray-200 mt-2">
+                        
+                        <!-- 그라데이션 프리셋 10개 추가 -->
+                        <div class="flex flex-wrap gap-1.5 mb-3">
+                            <button class="color-swatch" data-type="grad" data-c1="#fdfbfb" data-c2="#ebedee" style="background: linear-gradient(135deg, #fdfbfb, #ebedee)" onclick="setGradPreset(this, '#fdfbfb', '#ebedee')" title="클라우드"></button>
+                            <button class="color-swatch active" data-type="grad" data-c1="#fbcfe8" data-c2="#93c5fd" style="background: linear-gradient(135deg, #fbcfe8, #93c5fd)" onclick="setGradPreset(this, '#fbcfe8', '#93c5fd')" title="코튼 캔디"></button>
+                            <button class="color-swatch" data-type="grad" data-c1="#fdfbfb" data-c2="#f3e6e8" style="background: linear-gradient(135deg, #fdfbfb, #f3e6e8)" onclick="setGradPreset(this, '#fdfbfb', '#f3e6e8')" title="소프트 핑크"></button>
+                            <button class="color-swatch" data-type="grad" data-c1="#eafaf1" data-c2="#cce7d0" style="background: linear-gradient(135deg, #eafaf1, #cce7d0)" onclick="setGradPreset(this, '#eafaf1', '#cce7d0')" title="소프트 민트"></button>
+                            <button class="color-swatch" data-type="grad" data-c1="#e6e9f0" data-c2="#eef1f5" style="background: linear-gradient(135deg, #e6e9f0, #eef1f5)" onclick="setGradPreset(this, '#e6e9f0', '#eef1f5')" title="쿨 그레이"></button>
+                            <button class="color-swatch" data-type="grad" data-c1="#f5f7fa" data-c2="#c3cfe2" style="background: linear-gradient(135deg, #f5f7fa, #c3cfe2)" onclick="setGradPreset(this, '#f5f7fa', '#c3cfe2')" title="더스티 블루"></button>
+                            
+                            <button class="color-swatch" data-type="grad" data-c1="#232526" data-c2="#414345" style="background: linear-gradient(135deg, #232526, #414345)" onclick="setGradPreset(this, '#232526', '#414345')" title="다크 스틸"></button>
+                            <button class="color-swatch" data-type="grad" data-c1="#0f2027" data-c2="#203a43" style="background: linear-gradient(135deg, #0f2027, #203a43)" onclick="setGradPreset(this, '#0f2027', '#203a43')" title="딥 씨"></button>
+                            <button class="color-swatch" data-type="grad" data-c1="#2c3e50" data-c2="#000000" style="background: linear-gradient(135deg, #2c3e50, #000000)" onclick="setGradPreset(this, '#2c3e50', '#000000')" title="미드나잇"></button>
+                            <button class="color-swatch" data-type="grad" data-c1="#1e130c" data-c2="#3a2f28" style="background: linear-gradient(135deg, #1e130c, #3a2f28)" onclick="setGradPreset(this, '#1e130c', '#3a2f28')" title="다크 우드"></button>
+                        </div>
+
                         <div class="grid grid-cols-2 gap-2 mb-2">
                             <div>
                                 <label class="block text-[10px] text-gray-500 mb-1">시작 색상</label>
@@ -582,6 +597,17 @@
                         정리 실행하기
                     </button>
                 </div>
+
+                <!-- 위아래 빈 줄 제거 -->
+                <div class="mt-3 bg-gray-50 p-2.5 rounded border border-gray-200">
+                    <label class="block text-xs font-bold text-gray-600 mb-1">위아래 여백(빈 줄) 제거</label>
+                    <p class="text-[10px] text-gray-500 mb-2.5 leading-tight">
+                        로그 맨 위와 맨 아래에 들어간 불필요한 엔터(빈 줄)를 일괄 삭제하여 깔끔하게 정리합니다.
+                    </p>
+                    <button onclick="trimEmptyLines()" class="w-full bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 font-bold py-1.5 px-3 rounded text-xs transition shadow-sm">
+                        위아래 빈 줄 지우기
+                    </button>
+                </div>
             </div>
 
             <hr class="border-gray-100">
@@ -672,6 +698,14 @@
             <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('underline')" title="밑줄"><u class="text-base font-serif">U</u></button>
             <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('strikeThrough')" title="취소선"><s class="text-base font-serif">S</s></button>
             
+            <!-- 블러 버튼 추가 -->
+            <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="applyBlurToText()" title="흐리게 블러 처리 (스포일러 방지)">
+                <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+            </button>
+
             <div class="w-px h-5 bg-gray-300 mx-1 flex-shrink-0"></div>
 
             <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('justifyLeft')" title="왼쪽 정렬"><svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="15" y1="12" x2="3" y2="12"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg></button>
@@ -905,6 +939,21 @@
             applyCustomColor(type, color);
         }
 
+        // 그라데이션 프리셋 적용
+        function setGradPreset(buttonElement, c1, c2) {
+            const siblings = document.querySelectorAll('.color-swatch[data-type="grad"]');
+            siblings.forEach(btn => btn.classList.remove('active'));
+            buttonElement.classList.add('active');
+
+            gradColor1 = c1;
+            gradColor2 = c2;
+            
+            if(gradPickr1) { isSyncingGrad1 = true; gradPickr1.setColor(c1); isSyncingGrad1 = false; }
+            if(gradPickr2) { isSyncingGrad2 = true; gradPickr2.setColor(c2); isSyncingGrad2 = false; }
+            
+            updateGlobalStyles();
+        }
+
         // Pickr 버튼의 UI까지 정상적으로 변경될 수 있도록 수정
         function applyCustomColor(type, value, fromPickr = false) {
             const siblings = document.querySelectorAll(`.color-swatch[data-type="${type}"]`);
@@ -983,6 +1032,15 @@
             if(gradPickr2) { isSyncingGrad2 = true; gradPickr2.setColor(gradColor2); isSyncingGrad2 = false; }
             document.getElementById('gradDirection').value = "to bottom";
             document.getElementById('gradPos').value = "50";
+
+            // 그라데이션 프리셋 활성화 해제 및 기본값 갱신
+            const gradSiblings = document.querySelectorAll('.color-swatch[data-type="grad"]');
+            gradSiblings.forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.getAttribute('data-c1').toLowerCase() === gradColor1.toLowerCase() && btn.getAttribute('data-c2').toLowerCase() === gradColor2.toLowerCase()) {
+                    btn.classList.add('active');
+                }
+            });
 
             applyCustomColor('bg', "#ffffff");
             applyCustomColor('text', "#111111");
@@ -1129,6 +1187,64 @@
             document.execCommand('insertText', false, finalString);
         }
 
+        // 위아래 불필요한 공백, 빈 줄, 빈 태그들을 완전히 지우는 기능 추가
+        function trimEmptyLines() {
+            const editor = document.getElementById('editor');
+            const clone = editor.cloneNode(true);
+            let changed = false;
+            
+            // 앞쪽 빈 줄/공백 제거
+            while(clone.firstChild) {
+                let node = clone.firstChild;
+                let isNodeEmpty = false;
+                
+                if (node.nodeType === Node.TEXT_NODE && node.textContent.trim() === '') {
+                    isNodeEmpty = true;
+                } else if (node.nodeName === 'BR') {
+                    isNodeEmpty = true;
+                } else if ((node.nodeName === 'DIV' || node.nodeName === 'P' || node.nodeName === 'SPAN') && node.innerHTML.replace(/&nbsp;|\s|<br\s*\/?>/gi, '') === '') {
+                    isNodeEmpty = true;
+                }
+                
+                if (isNodeEmpty) {
+                    clone.removeChild(node);
+                    changed = true;
+                } else {
+                    break;
+                }
+            }
+            
+            // 뒤쪽 빈 줄/공백 제거
+            while(clone.lastChild) {
+                let node = clone.lastChild;
+                let isNodeEmpty = false;
+                
+                if (node.nodeType === Node.TEXT_NODE && node.textContent.trim() === '') {
+                    isNodeEmpty = true;
+                } else if (node.nodeName === 'BR') {
+                    isNodeEmpty = true;
+                } else if ((node.nodeName === 'DIV' || node.nodeName === 'P' || node.nodeName === 'SPAN') && node.innerHTML.replace(/&nbsp;|\s|<br\s*\/?>/gi, '') === '') {
+                    isNodeEmpty = true;
+                }
+                
+                if (isNodeEmpty) {
+                    clone.removeChild(node);
+                    changed = true;
+                } else {
+                    break;
+                }
+            }
+            
+            if (changed) {
+                let finalHtml = clone.innerHTML;
+                if (finalHtml === '') finalHtml = '이곳에 발췌할 로그를 붙여넣으세요.';
+                
+                editor.focus();
+                document.execCommand('selectAll', false, null);
+                document.execCommand('insertHTML', false, finalHtml);
+            }
+        }
+
         // HTML 및 히든 블록 완전 제거 
         function cleanHtmlAndHidden() {
             const editor = document.getElementById('editor');
@@ -1209,6 +1325,32 @@
             // 선택된 영역에만 변환된 HTML 덮어쓰기 (요청 반영)
             document.execCommand('insertHTML', false, html);
         }
+        
+        // 텍스트 블러 처리 기능
+        function applyBlurToText() {
+            if (savedSelectionRange) {
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(savedSelectionRange);
+            }
+
+            const sel = window.getSelection();
+            // 선택된 텍스트가 없으면 경고창 후 작동 중지
+            if (!sel.rangeCount || sel.isCollapsed) {
+                alert("흐리게(블러) 처리할 텍스트를 드래그하여 선택해주세요.");
+                return;
+            }
+
+            const html = sel.getRangeAt(0).cloneContents();
+            const div = document.createElement('div');
+            div.appendChild(html);
+
+            // html2canvas 렌더링 지원을 위해 filter: blur() 대신 color: transparent와 text-shadow 조합 사용
+            // 0.4em을 0.15em으로 대폭 줄여서 글자의 형태와 색깔이 어느 정도 선명하게 남도록 수정
+            const blurredHTML = `<span class="blur-effect" style="color: transparent !important; text-shadow: 0 0 0.15em currentColor;">${div.innerHTML}</span>`;
+            
+            document.execCommand('insertHTML', false, blurredHTML);
+        }
 
         function execCmd(command, value = null) {
             if (savedSelectionRange && command !== 'undo' && command !== 'redo') {
@@ -1236,6 +1378,15 @@
             document.execCommand('removeFormat', false, null);
             document.execCommand('backColor', false, 'transparent');
             document.execCommand('foreColor', false, currentTextColor);
+            
+            // 블러 효과 지우기
+            const editor = document.getElementById('editor');
+            const blurs = editor.querySelectorAll('.blur-effect');
+            blurs.forEach(el => {
+                const parent = el.parentNode;
+                while(el.firstChild) parent.insertBefore(el.firstChild, el);
+                parent.removeChild(el);
+            });
         }
 
         function closePreview() {
@@ -1635,6 +1786,15 @@
             if(gradPickr2) { isSyncingGrad2 = true; gradPickr2.setColor(gradColor2); isSyncingGrad2 = false; }
             document.getElementById('gradDirection').value = preset.gradDirection || 'to bottom';
 
+            // 그라데이션 프리셋 활성화 해제 및 기본값 갱신
+            const gradSiblings = document.querySelectorAll('.color-swatch[data-type="grad"]');
+            gradSiblings.forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.getAttribute('data-c1').toLowerCase() === gradColor1.toLowerCase() && btn.getAttribute('data-c2').toLowerCase() === gradColor2.toLowerCase()) {
+                    btn.classList.add('active');
+                }
+            });
+
             applyCustomColor('bg', preset.bgColor || "#ffffff");
             applyCustomColor('text', preset.textColor || "#111111");
             
@@ -1673,4 +1833,3 @@
     </script>
 </body>
 </html>
-

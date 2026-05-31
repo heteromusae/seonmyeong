@@ -138,6 +138,17 @@
             font-display: swap;
         }
 
+        /* 새로 추가된 폰트들 */
+        @font-face { font-family: 'OngleipParkDahyeon'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2') format('woff2'); font-weight: normal; font-display: swap; }
+        @font-face { font-family: 'NeoDonggeunmo'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.3/NeoDunggeunmo.woff') format('woff'); font-weight: normal; font-display: swap; }
+        @font-face {
+            font-family: 'SchoolSafetyKidariBalloon';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2511-1@1.0/HakgyoansimKidaripungseonL.woff2') format('woff2');
+            font-weight: normal;
+            font-display: swap;
+        }
+        @font-face { font-family: 'OngleIpSeaBreeze'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2510-1@1.0/Ownglyph_the_sea_breeze-Rg.woff2') format('woff2'); font-weight: normal; font-display: swap; }
+
         /* 스크롤바 */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -155,7 +166,7 @@
             box-sizing: border-box; 
         }
         
-        #editor div, #editor p, #editor span, #editor b, #editor i, #editor strong, #editor em {
+        #editor div, #editor p, #editor b, #editor i, #editor strong, #editor em {
             line-height: inherit;
         }
         #editor p { margin: 0; min-height: 1em; }
@@ -169,16 +180,18 @@
         
         #editor em { font-style: italic; opacity: 0.6; }
 
-        /* 들여쓰기 활성화 시 첫 줄 들여쓰기 적용 */
-        #editor.indent-active { text-indent: 1.5em; }
-        #editor.indent-active div, #editor.indent-active p { text-indent: 1.5em; }
+        /* 들여쓰기 활성화 시 첫 줄 들여쓰기 0.5em 적용 */
+        #editor.indent-active { text-indent: 0.5em; }
+        #editor.indent-active div, #editor.indent-active p { text-indent: 0.5em; }
 
-        /* 형광펜(배경색)이 이미지 캡처 시 위아래로 튀어나가는 현상 방지용 CSS */
+        /* 형광펜 랜더링 오류 수정 - 형광펜이 글씨 위를 덮지 않고 더 밑에 칠해지도록 보정 */
         #editor span[style*="background-color"], #editor font[style*="background-color"] {
-            padding: 0 1px;
-            border-radius: 2px;
-            -webkit-box-decoration-break: clone;
+            line-height: inherit !important;
+            padding-top: 0 !important; /* 위쪽 여백을 없애서 렌더링 시 위로 쏠리는 현상 방지 */
+            padding-bottom: 0.4em !important; /* 아래쪽으로 배경 영역을 확장 */
+            border-radius: 3px;
             box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
         }
 
         .toolbar-btn {
@@ -240,12 +253,12 @@
                 <div>
                     <h3 class="font-bold text-gray-900 mb-1">⚙️ 텍스트 자동 변환</h3>
                     <p><b>일괄 변환:</b> 별표로 감싸지지 않은 일반 텍스트 문단에 지정한 따옴표를 입히고, 지문에 붙은 별표를 모두 삭제합니다.<br>
-                    <b>웹 서식 정리:</b> 외부에서 복사한 HTML 코드를 정리하여 불필요한 태그와 스타일은 지우고 텍스트만 깔끔하게 보존합니다.</p>
+                    <b>웹 서식 정리:</b> 외부에서 복사한 HTML 코문을 정리하여 불필요한 태그와 스타일은 지우고 텍스트만 깔끔하게 보존합니다.</p>
                 </div>
                 <div>
                     <h3 class="font-bold text-gray-900 mb-1">✨ 상단 툴바 기능</h3>
                     <p><b>실행 취소 / 되돌리기:</b> 화살표 버튼을 통해 작업 내역을 되돌릴 수 있습니다.<br>
-                    <b>M↓ 마크다운:</b> *내용* 형태로 입력된 텍스트를 연하고 기울어진 폰트로 렌더링합니다.</p>
+                    <b>M↓ 마크다운:</b> *내용* 형식으로 작성시 기울임꼴과 함께 투명도 낮춤. 그 외에도 모든 마크다운 양식이 적용됩니다.</p>
                 </div>
                 <div>
                     <h3 class="font-bold text-gray-900 mb-1">📸 이미지 저장 및 자동 자르기</h3>
@@ -272,7 +285,7 @@
             </div>
             <div class="flex gap-2">
                 <button onclick="closePreview()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition">수정하기</button>
-                <button id="downloadBtn" onclick="downloadAllImages()" class="hidden px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold rounded transition shadow-lg flex items-center gap-2">
+                <button id="downloadBtn" onclick="downloadAllImages()" class="hidden px-5 py-2 bg-indigo-600 hover:bg-indigo-50 text-white text-sm font-bold rounded transition shadow-lg flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     다운로드
                 </button>
@@ -355,6 +368,12 @@
                             <option value="'Gowun Dodum', sans-serif">Gowun Dodum</option>
                             <option value="'Paperozi', sans-serif">Paperozi</option>
                             <option value="'Pretendard', sans-serif">Pretendard</option>
+                        </optgroup>
+                        <optgroup label="손글씨/특수">
+                            <option value="'OngleipParkDahyeon', sans-serif">온글잎 박다현</option>
+                            <option value="'OngleIpSeaBreeze', sans-serif">온글잎 바닷바람</option>
+                            <option value="'SchoolSafetyKidariBalloon', sans-serif">학교안심 키다리풍선</option>
+                            <option value="'NeoDonggeunmo', sans-serif">네오둥근모</option>
                         </optgroup>
                     </select>
                 </div>
@@ -493,7 +512,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div>
+                        <div class="mb-3">
                             <label class="block text-[10px] text-gray-500 mb-1">방향</label>
                             <select id="gradDirection" class="w-full border border-gray-300 rounded p-1 text-xs outline-none focus:border-indigo-500" onchange="updateGlobalStyles()">
                                 <option value="to bottom" selected>↓</option>
@@ -501,6 +520,10 @@
                                 <option value="to bottom right">↘</option>
                                 <option value="to top right">↗</option>
                             </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1">그라데이션 중심점 (<span id="gradPosVal">50</span>%)</label>
+                            <input type="range" id="gradPos" min="0" max="100" value="50" class="w-full accent-indigo-600" oninput="updateGlobalStyles()">
                         </div>
                     </div>
                 </div>
@@ -544,7 +567,7 @@
                 <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1">텍스트 변환</h3>
                 
                 <div>
-                    <label class="block text-xs font-medium mb-1 text-gray-700">대사 자동 변환 (별표 제거)</label>
+                    <label class="block text-xs font-medium mb-1 text-gray-700">대사 자동 변환</label>
                     <div class="flex gap-2">
                         <select id="quoteStyle" class="flex-1 border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-indigo-500 bg-gray-50">
                             <option value="smart">“ ” (둥근 따옴표)</option>
@@ -598,9 +621,23 @@
                     </select>
                 </div>
 
-                <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
-                    <input type="checkbox" id="autoTrim" class="rounded text-indigo-600 focus:ring-indigo-500" checked>
-                    <label for="autoTrim" class="text-xs font-medium text-gray-700 cursor-pointer">마지막 페이지 여백 자동 자르기</label>
+                <div class="flex flex-col gap-3 mt-4 pt-4 border-t border-gray-100">
+                    <label class="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
+                        <input type="checkbox" id="autoTrim" class="rounded text-indigo-600 focus:ring-indigo-500" checked onchange="saveAutoSettings()">
+                        <span>마지막 페이지 여백 자동 자르기</span>
+                    </label>
+                    
+                    <div>
+                        <label class="block text-xs font-medium mb-1.5 text-gray-700">발췌본 저장 순서</label>
+                        <div class="flex gap-2">
+                            <label class="flex items-center gap-1 text-[10px] cursor-pointer">
+                                <input type="radio" name="dlOrder" value="forward" checked onchange="saveAutoSettings()">정방향 (첫 장부터)
+                            </label>
+                            <label class="flex items-center gap-1 text-[10px] cursor-pointer">
+                                <input type="radio" name="dlOrder" value="reverse" onchange="saveAutoSettings()">역방향 (마지막 장부터)
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -620,7 +657,12 @@
         <!-- 상단 툴바 -->
         <header class="bg-white border-b border-gray-200 p-2 flex items-center gap-1 overflow-x-auto whitespace-nowrap shadow-sm z-10 flex-shrink-0">
             
-            <!-- 클립보드 붙여넣기 버튼 -->
+            <!-- 전체 삭제 (맨 왼쪽) -->
+            <button class="toolbar-btn text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-100" onmousedown="event.preventDefault()" onclick="clearEditorContent()" title="내용 전체 삭제">
+                <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+
+            <!-- 클립보드 붙여넣기 -->
             <button class="toolbar-btn text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100" onmousedown="event.preventDefault()" onclick="pasteFromClipboard()" title="클립보드 내용으로 전체 덮어쓰기">
                 <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
             </button>
@@ -656,14 +698,21 @@
                 <button class="w-4 h-4 rounded-full bg-[#111111]" onmousedown="event.preventDefault()" onclick="execCmd('foreColor', '#111111')"></button>
                 
                 <div class="w-px h-3 bg-gray-300 mx-0.5"></div>
-                <button id="lastCustomColorBtn" class="w-4 h-4 rounded shadow-sm border border-gray-300 ml-0.5" style="background-color: #9333ea;" onmousedown="event.preventDefault()" onclick="execCmd('foreColor', lastToolbarColor)" title="최근 선택한 자율색 적용"></button>
                 <div id="toolbarPickr" title="자율 글자색 선택"></div>
+                <button id="lastCustomColorBtn" class="w-4 h-4 rounded shadow-sm border border-gray-300 ml-0.5" style="background-color: #9333ea;" onmousedown="event.preventDefault()" onclick="execCmd('foreColor', lastToolbarColor)" title="최근 선택한 자율색 적용"></button>
             </div>
             
             <div class="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded border border-gray-200 flex-shrink-0 toolbar-pickr ml-1">
-                <span class="text-[10px] text-gray-600 mr-1 font-bold">형광펜</span>
+                <span class="text-[10px] text-gray-600 mr-1">형광펜</span>
+                
+                <!-- 상단 바 형광펜 색상 프리셋 축소 (3개: 핑크, 블루, 옐로우) -->
+                <button class="w-4 h-4 rounded-full bg-[#fbcfe8]" onmousedown="event.preventDefault()" onclick="updateHighlightColorBtn('rgba(249, 168, 212, 0.4)'); applyHighlight();" title="핑크"></button>
+                <button class="w-4 h-4 rounded-full bg-[#bfdbfe]" onmousedown="event.preventDefault()" onclick="updateHighlightColorBtn('rgba(147, 197, 253, 0.4)'); applyHighlight();" title="블루"></button>
+                <button class="w-4 h-4 rounded-full bg-[#fef08a]" onmousedown="event.preventDefault()" onclick="updateHighlightColorBtn('rgba(253, 224, 71, 0.4)'); applyHighlight();" title="옐로우"></button>
+
+                <div class="w-px h-3 bg-gray-300 mx-0.5"></div>
                 <div id="highlightPickr" title="형광펜 색상 선택"></div>
-                <button id="lastHighlightColorBtn" class="w-4 h-4 rounded shadow-sm border border-gray-300 flex items-center justify-center" style="background-color: rgba(253, 224, 71, 0.4);" onmousedown="event.preventDefault()" onclick="applyHighlight()" title="최근 선택한 형광펜 적용">
+                <button id="lastHighlightColorBtn" class="w-4 h-4 rounded shadow-sm border border-gray-300 flex items-center justify-center ml-0.5" style="background-color: rgba(249, 168, 212, 0.4);" onmousedown="event.preventDefault()" onclick="applyHighlight()" title="최근 선택한 형광펜 적용">
                     <span class="text-[9px] font-bold text-gray-800">T</span>
                 </button>
             </div>
@@ -695,7 +744,7 @@
         let currentBgColor = '#ffffff';
         let currentTextColor = '#111111';
         let lastToolbarColor = '#9333ea';
-        let lastHighlightColor = 'rgba(253, 224, 71, 0.4)';
+        let lastHighlightColor = 'rgba(249, 168, 212, 0.4)'; // 기본값 핑크
         
         let gradColor1 = '#fbcfe8';
         let gradColor2 = '#93c5fd';
@@ -715,7 +764,8 @@
 
         const highlightPickrConfig = {
             theme: 'classic',
-            swatches: ['rgba(253, 224, 71, 0.4)', 'rgba(134, 239, 172, 0.4)', 'rgba(147, 197, 253, 0.4)', 'rgba(249, 168, 212, 0.4)'],
+            // Pickr 팔레트 기본 색상 프리셋도 3개로 축소 반영 (핑크, 블루, 옐로우)
+            swatches: ['rgba(249, 168, 212, 0.4)', 'rgba(147, 197, 253, 0.4)', 'rgba(253, 224, 71, 0.4)'],
             components: {
                 preview: true, opacity: true, hue: true,
                 interaction: { hex: false, rgba: true, input: true, clear: false, save: true }
@@ -742,7 +792,7 @@
                 toolbarPickr.hide();
             });
 
-            highlightPickr = Pickr.create({ el: '#highlightPickr', default: 'rgba(253, 224, 71, 0.4)', ...highlightPickrConfig });
+            highlightPickr = Pickr.create({ el: '#highlightPickr', default: 'rgba(249, 168, 212, 0.4)', ...highlightPickrConfig });
             highlightPickr.on('save', (color) => {
                 lastHighlightColor = color.toRGBA().toString();
                 document.getElementById('lastHighlightColorBtn').style.backgroundColor = lastHighlightColor;
@@ -759,13 +809,17 @@
             gradPickr2.on('save', (color) => { gradColor2 = color.toHEXA().toString(); updateGlobalStyles(); gradPickr2.hide(); });
             gradPickr2.on('change', (color) => { gradColor2 = color.toHEXA().toString(); updateGlobalStyles(); });
 
-            // 자동 저장 내역 로드
+            // 자동 저장 내역 로드 (팝업 없이 자동)
             const savedLog = localStorage.getItem('autoSavedLog');
             const editorNode = document.getElementById('editor');
             if (savedLog && savedLog.trim() !== '' && savedLog.trim() !== '이곳에 발췌할 로그를 붙여넣으세요.') {
-                if (confirm("이전에 작업하던 로그 내용이 있습니다. 불러오시겠습니까?")) {
-                    editorNode.innerHTML = savedLog;
-                }
+                editorNode.innerHTML = savedLog;
+            }
+
+            // 자동 설정 로드
+            const autoSettings = JSON.parse(localStorage.getItem('autoSavedSettings'));
+            if (autoSettings) {
+                applySettingsObject(autoSettings);
             }
 
             const observer = new MutationObserver(() => {
@@ -802,6 +856,14 @@
                 } catch (err) {
                     alert('클립보드 접근에 실패했습니다. 브라우저 권한을 확인해주시거나 직접 붙여넣기(Ctrl+V) 해주세요.');
                 }
+            }
+        }
+
+        function clearEditorContent() {
+            if(confirm('모든 로그 내용이 삭제됩니다. 계속하시겠습니까?')) {
+                const editor = document.getElementById('editor');
+                editor.innerHTML = '';
+                editor.focus();
             }
         }
 
@@ -921,6 +983,7 @@
             document.getElementById('imageRatio').value = "1.5";
             document.getElementById('quoteStyle').value = "smart";
             document.getElementById('autoTrim').checked = true;
+            if(document.querySelector('input[name="dlOrder"][value="forward"]')) document.querySelector('input[name="dlOrder"][value="forward"]').checked = true;
 
             document.querySelector(`input[name="bgMode"][value="solid"]`).checked = true;
             toggleBgMode();
@@ -930,6 +993,7 @@
             if(gradPickr1) gradPickr1.setColor(gradColor1);
             if(gradPickr2) gradPickr2.setColor(gradColor2);
             document.getElementById('gradDirection').value = "to bottom";
+            document.getElementById('gradPos').value = "50";
 
             applyCustomColor('bg', "#ffffff");
             applyCustomColor('text', "#111111");
@@ -939,6 +1003,7 @@
         }
 
         function updateGlobalStyles() {
+            if(!document.getElementById('editor')) return;
             const editor = document.getElementById('editor');
             const wrapper = document.getElementById('export-wrapper');
             
@@ -983,8 +1048,44 @@
                 wrapper.style.background = currentBgColor;
             } else {
                 const dir = document.getElementById('gradDirection').value;
-                wrapper.style.background = `linear-gradient(${dir}, ${gradColor1}, ${gradColor2})`;
+                const gradPos = document.getElementById('gradPos').value;
+                if(document.getElementById('gradPosVal')) document.getElementById('gradPosVal').innerText = gradPos;
+                wrapper.style.background = `linear-gradient(${dir}, ${gradColor1}, ${gradPos}%, ${gradColor2})`;
             }
+
+            saveAutoSettings();
+        }
+
+        function saveAutoSettings() {
+            if(!document.getElementById('globalFont')) return; 
+            const settings = {
+                font: document.getElementById('globalFont').value,
+                fontSize: document.getElementById('globalFontSize').value,
+                lineHeight: document.getElementById('globalLineHeight').value,
+                letterSpacing: document.getElementById('globalLetterSpacing').value,
+                wordBreak: document.getElementById('globalWordBreak').value,
+                indent: document.getElementById('globalIndent').checked,
+                padding: document.getElementById('globalPadding').value,
+                paddingTop: document.getElementById('paddingTop').value,
+                paddingBottom: document.getElementById('paddingBottom').value,
+                paddingLeft: document.getElementById('paddingLeft').value,
+                paddingRight: document.getElementById('paddingRight').value,
+                
+                bgMode: document.querySelector('input[name="bgMode"]:checked').value,
+                bgColor: currentBgColor,
+                gradColor1: gradColor1,
+                gradColor2: gradColor2,
+                gradDirection: document.getElementById('gradDirection').value,
+                gradPos: document.getElementById('gradPos').value,
+                
+                textColor: currentTextColor,
+                texture: document.getElementById('paperTexture').value,
+                ratio: document.getElementById('imageRatio').value,
+                quoteStyle: document.getElementById('quoteStyle').value,
+                autoTrim: document.getElementById('autoTrim').checked,
+                downloadOrder: document.querySelector('input[name="dlOrder"]:checked') ? document.querySelector('input[name="dlOrder"]:checked').value : 'forward'
+            };
+            localStorage.setItem('autoSavedSettings', JSON.stringify(settings));
         }
 
         function toggleTexture() {
@@ -999,6 +1100,7 @@
             } else {
                 overlay.style.opacity = '0';
             }
+            saveAutoSettings();
         }
 
         function formatDialogue() {
@@ -1115,6 +1217,12 @@
             document.getElementById('editor').focus();
         }
 
+        function updateHighlightColorBtn(color) {
+            lastHighlightColor = color;
+            document.getElementById('lastHighlightColorBtn').style.backgroundColor = color;
+            if (highlightPickr) highlightPickr.setColor(color);
+        }
+
         function applyHighlight() {
             if (savedSelectionRange) {
                 const sel = window.getSelection();
@@ -1140,7 +1248,6 @@
             document.getElementById('previewContainer').innerHTML = ''; 
         }
 
-        // 투명 캡처를 기반으로 알파 채널 검사 방식을 이용한 여백 자르기
         function findSafeCutY(ctx, width, startY, targetHeight, minHeight) {
             if (startY + targetHeight >= ctx.canvas.height) {
                 return ctx.canvas.height - startY;
@@ -1165,6 +1272,21 @@
                 if (isBlank) return minHeight + y; 
             }
             return targetHeight; 
+        }
+        
+        function mixHexColors(c1, c2, percent) {
+            const parse = c => {
+                let hex = c.replace('#', '');
+                if (hex.length === 3) hex = hex.split('').map(x => x+x).join('');
+                return [parseInt(hex.slice(0,2),16), parseInt(hex.slice(2,4),16), parseInt(hex.slice(4,6),16)];
+            };
+            const [r1, g1, b1] = parse(c1);
+            const [r2, g2, b2] = parse(c2);
+            const p = percent / 100;
+            const r = Math.round(r1 + (r2 - r1) * p).toString(16).padStart(2, '0');
+            const g = Math.round(g1 + (g2 - g1) * p).toString(16).padStart(2, '0');
+            const b = Math.round(b1 + (b2 - b1) * p).toString(16).padStart(2, '0');
+            return `#${r}${g}${b}`;
         }
 
         async function generatePreview() {
@@ -1234,12 +1356,15 @@
                     // 배경 채우기
                     if (bgMode === 'gradient') {
                         const dir = document.getElementById('gradDirection').value;
+                        const gradPos = document.getElementById('gradPos').value;
                         let grad;
                         if (dir === 'to right') grad = ctx.createLinearGradient(0, 0, width, 0);
                         else if (dir === 'to bottom right') grad = ctx.createLinearGradient(0, 0, width, totalHeight);
                         else if (dir === 'to top right') grad = ctx.createLinearGradient(0, totalHeight, width, 0);
                         else grad = ctx.createLinearGradient(0, 0, 0, totalHeight); 
+                        
                         grad.addColorStop(0, gradColor1);
+                        grad.addColorStop(gradPos / 100, mixHexColors(gradColor1, gradColor2, 50));
                         grad.addColorStop(1, gradColor2);
                         ctx.fillStyle = grad;
                     } else {
@@ -1308,15 +1433,18 @@
                         sliceCanvas.height = ACTUAL_SLICE_HEIGHT;
                         const ctx = sliceCanvas.getContext('2d');
                         
-                        // 배경 채우기 (각 페이지마다 새로운 그라데이션)
+                        // 페이지마다 개별적인 그라데이션 적용
                         if (bgMode === 'gradient') {
                             const dir = document.getElementById('gradDirection').value;
+                            const gradPos = document.getElementById('gradPos').value;
                             let grad;
                             if (dir === 'to right') grad = ctx.createLinearGradient(0, 0, width, 0);
                             else if (dir === 'to bottom right') grad = ctx.createLinearGradient(0, 0, width, ACTUAL_SLICE_HEIGHT);
                             else if (dir === 'to top right') grad = ctx.createLinearGradient(0, ACTUAL_SLICE_HEIGHT, width, 0);
                             else grad = ctx.createLinearGradient(0, 0, 0, ACTUAL_SLICE_HEIGHT); 
+                            
                             grad.addColorStop(0, gradColor1);
+                            grad.addColorStop(gradPos / 100, mixHexColors(gradColor1, gradColor2, 50));
                             grad.addColorStop(1, gradColor2);
                             ctx.fillStyle = grad;
                         } else {
@@ -1374,16 +1502,30 @@
             if (previewImages.length === 0) return;
             
             const timestamp = new Date().getTime();
+            const dlOrder = document.querySelector('input[name="dlOrder"]:checked') ? document.querySelector('input[name="dlOrder"]:checked').value : 'forward';
             
-            for (let i = 0; i < previewImages.length; i++) {
+            // 이미지 배열에 순서 정보 추가
+            let dlList = previewImages.map((url, idx) => ({ url, num: idx + 1 }));
+            
+            if (dlOrder === 'reverse') {
+                dlList.reverse();
+            }
+
+            const padLen = previewImages.length.toString().length;
+
+            for (let i = 0; i < dlList.length; i++) {
+                const item = dlList[i];
+                const paddedNum = item.num.toString().padStart(padLen, '0');
+                
                 const link = document.createElement('a');
-                link.download = `발췌본_${timestamp}_${i + 1}.png`;
-                link.href = previewImages[i];
+                link.download = `발췌본_${timestamp}_${paddedNum}.png`;
+                link.href = item.url;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
                 
-                await new Promise(r => setTimeout(r, 1000));
+                // 순서 꼬임을 방지하기 위한 강제 시간 지연
+                await new Promise(r => setTimeout(r, 600));
             }
             closePreview();
         }
@@ -1432,12 +1574,14 @@
                 gradColor1: gradColor1,
                 gradColor2: gradColor2,
                 gradDirection: document.getElementById('gradDirection').value,
+                gradPos: document.getElementById('gradPos').value,
                 
                 textColor: currentTextColor,
                 texture: document.getElementById('paperTexture').value,
                 ratio: document.getElementById('imageRatio').value,
                 quoteStyle: document.getElementById('quoteStyle').value,
-                autoTrim: document.getElementById('autoTrim').checked
+                autoTrim: document.getElementById('autoTrim').checked,
+                downloadOrder: document.querySelector('input[name="dlOrder"]:checked') ? document.querySelector('input[name="dlOrder"]:checked').value : 'forward'
             };
 
             let presets = JSON.parse(localStorage.getItem('logPresets') || '{}');
@@ -1449,14 +1593,8 @@
             alert(`'${name}' 프리셋이 저장되었습니다.`);
         }
 
-        function loadPreset() {
-            const name = document.getElementById('presetSelect').value;
-            if (!name) return;
-
-            let presets = JSON.parse(localStorage.getItem('logPresets') || '{}');
-            const preset = presets[name];
+        function applySettingsObject(preset) {
             if (!preset) return;
-
             document.getElementById('globalFont').value = preset.font || "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
             document.getElementById('globalFontSize').value = preset.fontSize || "10px";
             document.getElementById('globalLineHeight').value = preset.lineHeight || "1.8";
@@ -1480,10 +1618,21 @@
             document.getElementById('imageRatio').value = preset.ratio || "1.5";
             document.getElementById('quoteStyle').value = preset.quoteStyle || "smart";
             document.getElementById('autoTrim').checked = preset.autoTrim !== undefined ? preset.autoTrim : true;
+            
+            if(preset.downloadOrder && document.querySelector(`input[name="dlOrder"][value="${preset.downloadOrder}"]`)) {
+                document.querySelector(`input[name="dlOrder"][value="${preset.downloadOrder}"]`).checked = true;
+            }
 
             const mode = preset.bgMode || 'solid';
-            document.querySelector(`input[name="bgMode"][value="${mode}"]`).checked = true;
-            toggleBgMode();
+            if (document.querySelector(`input[name="bgMode"][value="${mode}"]`)) {
+                document.querySelector(`input[name="bgMode"][value="${mode}"]`).checked = true;
+                toggleBgMode();
+            }
+
+            if (preset.gradPos) {
+                document.getElementById('gradPos').value = preset.gradPos;
+                if(document.getElementById('gradPosVal')) document.getElementById('gradPosVal').innerText = preset.gradPos;
+            }
 
             gradColor1 = preset.gradColor1 || '#fbcfe8';
             gradColor2 = preset.gradColor2 || '#93c5fd';
@@ -1495,6 +1644,18 @@
             applyCustomColor('text', preset.textColor || "#111111");
             
             toggleTexture();
+            updateGlobalStyles();
+        }
+
+        function loadPreset() {
+            const name = document.getElementById('presetSelect').value;
+            if (!name) return;
+
+            let presets = JSON.parse(localStorage.getItem('logPresets') || '{}');
+            const preset = presets[name];
+            if (preset) {
+                applySettingsObject(preset);
+            }
         }
 
         function deletePreset() {
@@ -1512,7 +1673,6 @@
        // 툴 초기화
        document.getElementById('customBgHex').value = currentBgColor;
        document.getElementById('customTextHex').value = currentTextColor;
-       updateGlobalStyles();
        updatePresetList();
 
     </script>

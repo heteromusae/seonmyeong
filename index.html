@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI 로그 발췌 툴</title>
+    <title>로그 발췌 툴</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,6 +15,10 @@
     <!-- Marked.js (마크다운 파싱용) -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
+    <!-- Pickr (컬러 피커 라이브러리) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -165,6 +169,18 @@
         
         #editor em { font-style: italic; opacity: 0.6; }
 
+        /* 들여쓰기 활성화 시 첫 줄 들여쓰기 적용 */
+        #editor.indent-active { text-indent: 1.5em; }
+        #editor.indent-active div, #editor.indent-active p { text-indent: 1.5em; }
+
+        /* 형광펜(배경색)이 이미지 캡처 시 위아래로 튀어나가는 현상 방지용 CSS */
+        #editor span[style*="background-color"], #editor font[style*="background-color"] {
+            padding: 0 1px;
+            border-radius: 2px;
+            -webkit-box-decoration-break: clone;
+            box-decoration-break: clone;
+        }
+
         .toolbar-btn {
             display: inline-flex; align-items: center; justify-content: center;
             width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0;
@@ -180,13 +196,21 @@
         .color-swatch:active { transform: scale(0.9); }
         .color-swatch.active { border-color: #4f46e5; outline: 2px solid #c7d2fe; }
 
-        .paper-texture::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.01'/%3E%3C/svg%3E");
-            pointer-events: none; 
-            z-index: 10;
+        /* Pickr 버튼 크기 맞춤 설정 */
+        .pcr-button { width: 1.75rem !important; height: 1.75rem !important; border-radius: 0.25rem !important; }
+        .toolbar-pickr .pcr-button { width: 1rem !important; height: 1rem !important; border-radius: 0.25rem !important; }
+        .grad-pickr .pcr-button { width: 1.5rem !important; height: 1.5rem !important; border-radius: 0.25rem !important; }
+
+        /* CSS 종이 질감 바리에이션 */
+        .texture-basic {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.0' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+        }
+        .texture-rough {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+        .texture-canvas {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+            background-size: 10px 10px;
         }
 
         #export-wrapper {
@@ -199,12 +223,12 @@
 </head>
 <body class="bg-gray-100 h-[100dvh] w-screen flex flex-col md:flex-row overflow-hidden font-noto-sans text-gray-800">
 
-    <!-- ★ 도움말 팝업 (모달) 수정됨 -->
+    <!-- 도움말 팝업 (모달) -->
     <div id="helpModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 z-[110] flex justify-center items-center p-4">
         <div class="bg-white rounded-lg w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
             <div class="flex justify-between items-center p-4 border-b border-gray-200">
                 <h2 class="text-lg font-bold text-indigo-700 flex items-center gap-2">💡 사용 방법 및 기능 안내</h2>
-                <button onclick="closeHelp()" class="text-gray-400 hover:text-gray-600 transition">
+                <button onclick="closeHelp()" class="text-gray-400 hover:text-gray-600 transition flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
             </div>
@@ -216,12 +240,12 @@
                 <div>
                     <h3 class="font-bold text-gray-900 mb-1">⚙️ 텍스트 자동 변환</h3>
                     <p><b>일괄 변환:</b> 별표로 감싸지지 않은 일반 텍스트 문단에 지정한 따옴표를 입히고, 지문에 붙은 별표를 모두 삭제합니다.<br>
-                    <b>HTML/히든 블록 제거:</b> HTML 웹 태그를 모두 삭제하여 순수 텍스트로 정리합니다.</p>
+                    <b>웹 서식 정리:</b> 외부에서 복사한 HTML 코드를 정리하여 불필요한 태그와 스타일은 지우고 텍스트만 깔끔하게 보존합니다.</p>
                 </div>
                 <div>
                     <h3 class="font-bold text-gray-900 mb-1">✨ 상단 툴바 기능</h3>
                     <p><b>실행 취소 / 되돌리기:</b> 화살표 버튼을 통해 작업 내역을 되돌릴 수 있습니다.<br>
-                    <b>M↓ 마크다운:</b> *(내용)* 형태로 입력된 텍스트를 연하고 기울어진 폰트로 렌더링합니다.</p>
+                    <b>M↓ 마크다운:</b> *내용* 형태로 입력된 텍스트를 연하고 기울어진 폰트로 렌더링합니다.</p>
                 </div>
                 <div>
                     <h3 class="font-bold text-gray-900 mb-1">📸 이미지 저장 및 자동 자르기</h3>
@@ -229,7 +253,8 @@
                 </div>
                 <div>
                     <h3 class="font-bold text-gray-900 mb-1">✉️ 제작자 코멘트</h3>
-                    <p>문제 생기면 사이트 내립니다…. 부디 잘 써주시길 바라요 uu</p>
+                    <p>문제 생기면 사이트 내립니다…. 부디 잘 써주시길 바라요 uu<br><br>
+                    <span class="text-xs text-gray-500">※ 본 사이트를 이용함으로써 발생할 수 있는 저작권 침해 등 모든 법적 분쟁 및 문제에 대한 책임은 전적으로 사용자 본인에게 있습니다.</span></p>
                 </div>
             </div>
             <div class="p-4 bg-gray-50 border-t border-gray-200 text-center">
@@ -265,8 +290,10 @@
             <span class="text-[11px] font-normal text-gray-400 tracking-wide mt-0.5">by @heteromusae</span>
         </h1>
         <div class="flex items-center gap-2">
-            <button onclick="openHelp()" class="text-xs font-bold text-gray-500 hover:text-gray-800 bg-gray-100 px-2 py-1.5 rounded transition">도움말</button>
-            <button onclick="toggleMobileMenu()" class="text-gray-600 p-1">
+            <button onclick="openHelp()" class="text-gray-500 hover:text-gray-800 p-1 flex-shrink-0" title="도움말">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </button>
+            <button onclick="toggleMobileMenu()" class="text-gray-600 p-1 flex-shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
         </div>
@@ -280,8 +307,10 @@
                 <span class="text-[11px] font-normal text-gray-400 tracking-wide">by @heteromusae</span>
             </h2>
             <div class="flex items-center gap-2">
-                <button onclick="openHelp()" class="hidden md:block text-xs font-bold text-gray-500 hover:text-gray-800 bg-gray-100 px-2 py-1 rounded transition">도움말</button>
-                <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-gray-500 hover:text-gray-800">
+                <button onclick="openHelp()" class="hidden md:flex flex-shrink-0 items-center justify-center text-gray-400 hover:text-indigo-600 transition" title="도움말">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </button>
+                <button onclick="toggleMobileMenu()" class="md:hidden p-2 flex-shrink-0 text-gray-500 hover:text-gray-800">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
             </div>
@@ -307,7 +336,10 @@
 
             <!-- 텍스트 설정 -->
             <div class="space-y-4">
-                <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1">서식 설정</h3>
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1">서식 설정</h3>
+                    <button onclick="resetAllSettings()" class="text-[10px] text-gray-500 hover:text-red-500 font-bold bg-gray-100 hover:bg-red-50 px-2 py-0.5 rounded border border-gray-200 transition">전체 초기화</button>
+                </div>
                 
                 <div>
                     <label class="block text-xs font-medium mb-1 text-gray-700">폰트</label>
@@ -360,8 +392,8 @@
 
                 <div class="grid grid-cols-2 gap-2 mt-2">
                     <div>
-                        <label class="block text-xs font-medium mb-1 text-gray-700">자간</label>
-                        <input type="range" id="globalLetterSpacing" min="-10" max="10" value="-3" class="w-full accent-indigo-600" oninput="updateGlobalStyles()">
+                        <label class="block text-xs font-medium mb-1 text-gray-700">자간 <span id="globalLetterSpacingVal" class="text-gray-500 font-normal ml-1">-0.5px</span></label>
+                        <input type="range" id="globalLetterSpacing" min="-3" max="5" step="0.5" value="-0.5" class="w-full accent-indigo-600" oninput="updateGlobalStyles()">
                     </div>
                     <div>
                         <label class="block text-xs font-medium mb-1 text-gray-700">줄바꿈 기준</label>
@@ -370,6 +402,11 @@
                             <option value="break-all">글자 단위</option>
                         </select>
                     </div>
+                </div>
+
+                <div class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+                    <input type="checkbox" id="globalIndent" class="rounded text-indigo-600 focus:ring-indigo-500" onchange="updateGlobalStyles()">
+                    <label for="globalIndent" class="text-xs font-medium text-gray-700 cursor-pointer">문단 첫 줄 들여쓰기</label>
                 </div>
                 
                 <div class="mt-4">
@@ -411,23 +448,60 @@
                 
                 <!-- 배경색 -->
                 <div>
-                    <label class="block text-xs font-medium mb-1.5 text-gray-700">배경색</label>
-                    <div class="flex flex-wrap gap-1.5 mb-2">
-                        <button class="color-swatch bg-[#ffffff] active" data-type="bg" data-color="#ffffff" onclick="setPaletteColor(this, 'bg')" title="기본 화이트"></button>
-                        <button class="color-swatch bg-[#f8f6f2]" data-type="bg" data-color="#f8f6f2" onclick="setPaletteColor(this, 'bg')" title="연한 미색"></button>
-                        <button class="color-swatch bg-[#f2efe9]" data-type="bg" data-color="#f2efe9" onclick="setPaletteColor(this, 'bg')" title="연한 회갈색"></button>
-                        <button class="color-swatch bg-[#e8ece6]" data-type="bg" data-color="#e8ece6" onclick="setPaletteColor(this, 'bg')" title="차분한 민트"></button>
-                        <button class="color-swatch bg-[#f0eaea]" data-type="bg" data-color="#f0eaea" onclick="setPaletteColor(this, 'bg')" title="더스티 로즈"></button>
-                        <button class="color-swatch bg-[#e6e6e8]" data-type="bg" data-color="#e6e6e8" onclick="setPaletteColor(this, 'bg')" title="소프트 쿨그레이"></button>
-
-                        <button class="color-swatch bg-[#121212]" data-type="bg" data-color="#121212" onclick="setPaletteColor(this, 'bg')" title="다크 모드"></button>
-                        <button class="color-swatch bg-[#1e293b]" data-type="bg" data-color="#1e293b" onclick="setPaletteColor(this, 'bg')" title="네이비 다크"></button>
-                        <button class="color-swatch bg-[#2c302e]" data-type="bg" data-color="#2c302e" onclick="setPaletteColor(this, 'bg')" title="딥 포레스트"></button>
-                        <button class="color-swatch bg-[#3a3335]" data-type="bg" data-color="#3a3335" onclick="setPaletteColor(this, 'bg')" title="다크 모카"></button>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-medium text-gray-700">배경색</label>
+                        <div class="flex gap-2">
+                            <label class="flex items-center gap-1 text-[10px] cursor-pointer"><input type="radio" name="bgMode" value="solid" checked onchange="toggleBgMode()">단색</label>
+                            <label class="flex items-center gap-1 text-[10px] cursor-pointer"><input type="radio" name="bgMode" value="gradient" onchange="toggleBgMode()">그라데이션</label>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <input type="color" id="customBgColor" value="#ffffff" class="w-7 h-7 p-0 border-0 rounded cursor-pointer" oninput="applyCustomColor('bg', this.value)">
-                        <input type="text" id="customBgHex" value="#ffffff" class="flex-1 border border-gray-300 rounded p-1 text-xs outline-none focus:border-indigo-500 uppercase font-mono" placeholder="#FFFFFF" oninput="applyCustomColor('bg', this.value)">
+                    
+                    <!-- 단색 모드 영역 -->
+                    <div id="solidBgArea">
+                        <div class="flex flex-wrap gap-1.5 mb-2">
+                            <button class="color-swatch bg-[#ffffff] active" data-type="bg" data-color="#ffffff" onclick="setPaletteColor(this, 'bg')" title="기본 화이트"></button>
+                            <button class="color-swatch bg-[#f8f6f2]" data-type="bg" data-color="#f8f6f2" onclick="setPaletteColor(this, 'bg')" title="연한 미색"></button>
+                            <button class="color-swatch bg-[#f2efe9]" data-type="bg" data-color="#f2efe9" onclick="setPaletteColor(this, 'bg')" title="연한 회갈색"></button>
+                            <button class="color-swatch bg-[#e8ece6]" data-type="bg" data-color="#e8ece6" onclick="setPaletteColor(this, 'bg')" title="차분한 민트"></button>
+                            <button class="color-swatch bg-[#f0eaea]" data-type="bg" data-color="#f0eaea" onclick="setPaletteColor(this, 'bg')" title="더스티 로즈"></button>
+                            <button class="color-swatch bg-[#e6e6e8]" data-type="bg" data-color="#e6e6e8" onclick="setPaletteColor(this, 'bg')" title="소프트 쿨그레이"></button>
+
+                            <button class="color-swatch bg-[#121212]" data-type="bg" data-color="#121212" onclick="setPaletteColor(this, 'bg')" title="다크 모드"></button>
+                            <button class="color-swatch bg-[#1e293b]" data-type="bg" data-color="#1e293b" onclick="setPaletteColor(this, 'bg')" title="네이비 다크"></button>
+                            <button class="color-swatch bg-[#2c302e]" data-type="bg" data-color="#2c302e" onclick="setPaletteColor(this, 'bg')" title="딥 포레스트"></button>
+                            <button class="color-swatch bg-[#3a3335]" data-type="bg" data-color="#3a3335" onclick="setPaletteColor(this, 'bg')" title="다크 모카"></button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div id="bgPickr"></div>
+                            <input type="text" id="customBgHex" value="#ffffff" class="flex-1 border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-indigo-500 uppercase font-mono" placeholder="#FFFFFF" oninput="applyCustomColor('bg', this.value)">
+                        </div>
+                    </div>
+
+                    <!-- 그라데이션 모드 영역 -->
+                    <div id="gradientBgArea" class="hidden bg-gray-50 p-2.5 rounded border border-gray-200 mt-2">
+                        <div class="grid grid-cols-2 gap-2 mb-2">
+                            <div>
+                                <label class="block text-[10px] text-gray-500 mb-1">시작 색상</label>
+                                <div class="flex items-center gap-1 grad-pickr">
+                                    <div id="gradPickr1"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-gray-500 mb-1">끝 색상</label>
+                                <div class="flex items-center gap-1 grad-pickr">
+                                    <div id="gradPickr2"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1">방향</label>
+                            <select id="gradDirection" class="w-full border border-gray-300 rounded p-1 text-xs outline-none focus:border-indigo-500" onchange="updateGlobalStyles()">
+                                <option value="to bottom" selected>↓</option>
+                                <option value="to right">→</option>
+                                <option value="to bottom right">↘</option>
+                                <option value="to top right">↗</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -447,14 +521,19 @@
                         <button class="color-swatch bg-[#d1cac7]" data-type="text" data-color="#d1cac7" onclick="setPaletteColor(this, 'text')" title="라이트 베이지"></button>
                     </div>
                     <div class="flex items-center gap-2">
-                        <input type="color" id="customTextColor" value="#111111" class="w-7 h-7 p-0 border-0 rounded cursor-pointer" oninput="applyCustomColor('text', this.value)">
-                        <input type="text" id="customTextHex" value="#111111" class="flex-1 border border-gray-300 rounded p-1 text-xs outline-none focus:border-indigo-500 uppercase font-mono" placeholder="#111111" oninput="applyCustomColor('text', this.value)">
+                        <div id="textPickr"></div>
+                        <input type="text" id="customTextHex" value="#111111" class="flex-1 border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-indigo-500 uppercase font-mono" placeholder="#111111" oninput="applyCustomColor('text', this.value)">
                     </div>
                 </div>
                 
-                <div class="flex items-center gap-2 mt-2 pt-2 border-t border-gray-100">
-                    <input type="checkbox" id="paperTexture" class="rounded text-indigo-600 focus:ring-indigo-500" onchange="toggleTexture()">
-                    <label for="paperTexture" class="text-xs font-medium text-gray-700 cursor-pointer">종이 질감(노이즈) 효과 적용</label>
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <label class="block text-xs font-medium mb-1.5 text-gray-700">종이 질감 효과</label>
+                    <select id="paperTexture" class="w-full border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-indigo-500 bg-gray-50" onchange="toggleTexture()">
+                        <option value="none" selected>적용 안 함</option>
+                        <option value="basic">기본 노이즈</option>
+                        <option value="rough">거친 종이</option>
+                        <option value="canvas">캔버스</option>
+                    </select>
                 </div>
             </div>
 
@@ -463,6 +542,7 @@
             <!-- 대사 자동 변환 기능 -->
             <div class="space-y-4">
                 <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1">텍스트 변환</h3>
+                
                 <div>
                     <label class="block text-xs font-medium mb-1 text-gray-700">대사 자동 변환 (별표 제거)</label>
                     <div class="flex gap-2">
@@ -475,15 +555,18 @@
                         </button>
                     </div>
                     <p class="text-[10px] text-gray-500 mt-1.5 leading-tight">
-                        *별표*로 감싸지지 않은 문단에 따옴표를 씌우고, 글 전체의 별표를 삭제합니다. (기존 색상 등 서식 초기화)
+                        별표로 감싸지지 않은 문단에 따옴표를 씌우고, 글 전체의 별표를 삭제합니다. (기존 서식은 초기화됩니다)
                     </p>
                 </div>
 
-                <!-- ★ 수정된 HTML/히든 블록 일괄 제거 버튼 -->
-                <div class="mt-3">
-                    <label class="block text-xs font-medium mb-1 text-gray-700">웹 서식 정리</label>
-                    <button onclick="cleanHtmlAndHidden()" class="w-full bg-gray-50 hover:bg-gray-100 text-gray-600 border border-gray-200 font-bold py-1.5 px-3 rounded text-xs transition">
-                        HTML 코드 및 히든 블록 제거
+                <!-- 웹 서식 완전 제거 -->
+                <div class="mt-3 bg-gray-50 p-2.5 rounded border border-gray-200">
+                    <label class="block text-xs font-bold text-gray-600 mb-1">웹 서식 정리</label>
+                    <p class="text-[10px] text-gray-500 mb-2.5 leading-tight">
+                        로그의 style 태그 내용, 숨겨진 텍스트, 코드블럭(```)을 모두 삭제하고 텍스트만 남깁니다.
+                    </p>
+                    <button onclick="cleanHtmlAndHidden()" class="w-full bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 font-bold py-1.5 px-3 rounded text-xs transition shadow-sm">
+                        정리 실행하기
                     </button>
                 </div>
             </div>
@@ -525,7 +608,7 @@
 
         <div class="p-4 bg-white border-t border-gray-200">
             <button onclick="generatePreview()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded shadow-md transition flex items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                 발췌본 만들기
             </button>
         </div>
@@ -537,11 +620,18 @@
         <!-- 상단 툴바 -->
         <header class="bg-white border-b border-gray-200 p-2 flex items-center gap-1 overflow-x-auto whitespace-nowrap shadow-sm z-10 flex-shrink-0">
             
+            <!-- 클립보드 붙여넣기 버튼 -->
+            <button class="toolbar-btn text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100" onmousedown="event.preventDefault()" onclick="pasteFromClipboard()" title="클립보드 내용으로 전체 덮어쓰기">
+                <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+            </button>
+            
+            <div class="w-px h-5 bg-gray-300 mx-1 flex-shrink-0"></div>
+
             <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('undo')" title="실행 취소">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"></path></svg>
+                <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"></path></svg>
             </button>
             <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('redo')" title="되돌리기">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3l3 2.7"></path></svg>
+                <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3l3 2.7"></path></svg>
             </button>
             <div class="w-px h-5 bg-gray-300 mx-1 flex-shrink-0"></div>
 
@@ -552,19 +642,30 @@
             
             <div class="w-px h-5 bg-gray-300 mx-1 flex-shrink-0"></div>
 
-            <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('justifyLeft')" title="왼쪽 정렬"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="15" y1="12" x2="3" y2="12"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg></button>
-            <button class="toolbar-btn active" onmousedown="event.preventDefault()" onclick="execCmd('justifyFull')" title="양쪽 정렬 (소설용)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="12" x2="3" y2="12"></line><line x1="21" y1="18" x2="3" y2="18"></line></svg></button>
-            <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('justifyCenter')" title="가운데 정렬"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="19" y1="12" x2="5" y2="12"></line><line x1="21" y1="18" x2="3" y2="18"></line></svg></button>
-            <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('justifyRight')" title="오른쪽 정렬"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="12" x2="9" y2="12"></line><line x1="21" y1="18" x2="5" y2="18"></line></svg></button>
+            <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('justifyLeft')" title="왼쪽 정렬"><svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="15" y1="12" x2="3" y2="12"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg></button>
+            <button class="toolbar-btn active" onmousedown="event.preventDefault()" onclick="execCmd('justifyFull')" title="양쪽 정렬 (소설용)"><svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="12" x2="3" y2="12"></line><line x1="21" y1="18" x2="3" y2="18"></line></svg></button>
+            <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('justifyCenter')" title="가운데 정렬"><svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="19" y1="12" x2="5" y2="12"></line><line x1="21" y1="18" x2="3" y2="18"></line></svg></button>
+            <button class="toolbar-btn" onmousedown="event.preventDefault()" onclick="execCmd('justifyRight')" title="오른쪽 정렬"><svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="12" x2="9" y2="12"></line><line x1="21" y1="18" x2="5" y2="18"></line></svg></button>
 
             <div class="w-px h-5 bg-gray-300 mx-1 flex-shrink-0"></div>
             
-            <div class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded border border-gray-200 flex-shrink-0">
+            <div class="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded border border-gray-200 flex-shrink-0 toolbar-pickr">
                 <span class="text-[10px] text-gray-500 mr-1">글자색</span>
                 <button class="w-4 h-4 rounded-full bg-[#ef4444]" onmousedown="event.preventDefault()" onclick="execCmd('foreColor', '#ef4444')"></button>
                 <button class="w-4 h-4 rounded-full bg-[#3b82f6]" onmousedown="event.preventDefault()" onclick="execCmd('foreColor', '#3b82f6')"></button>
                 <button class="w-4 h-4 rounded-full bg-[#111111]" onmousedown="event.preventDefault()" onclick="execCmd('foreColor', '#111111')"></button>
-                <input type="color" onchange="execCmd('foreColor', this.value)" class="w-4 h-4 rounded cursor-pointer border-0 p-0 ml-1" title="자율 글자색">
+                
+                <div class="w-px h-3 bg-gray-300 mx-0.5"></div>
+                <button id="lastCustomColorBtn" class="w-4 h-4 rounded shadow-sm border border-gray-300 ml-0.5" style="background-color: #9333ea;" onmousedown="event.preventDefault()" onclick="execCmd('foreColor', lastToolbarColor)" title="최근 선택한 자율색 적용"></button>
+                <div id="toolbarPickr" title="자율 글자색 선택"></div>
+            </div>
+            
+            <div class="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded border border-gray-200 flex-shrink-0 toolbar-pickr ml-1">
+                <span class="text-[10px] text-gray-600 mr-1 font-bold">형광펜</span>
+                <div id="highlightPickr" title="형광펜 색상 선택"></div>
+                <button id="lastHighlightColorBtn" class="w-4 h-4 rounded shadow-sm border border-gray-300 flex items-center justify-center" style="background-color: rgba(253, 224, 71, 0.4);" onmousedown="event.preventDefault()" onclick="applyHighlight()" title="최근 선택한 형광펜 적용">
+                    <span class="text-[9px] font-bold text-gray-800">T</span>
+                </button>
             </div>
 
             <div class="w-px h-5 bg-gray-300 mx-1 flex-shrink-0"></div>
@@ -582,7 +683,10 @@
         <div class="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center items-start relative" id="scroll-area">
             
             <div id="export-wrapper" class="w-full max-w-[500px] bg-white transition-colors duration-200 relative">
-                <div id="editor" contenteditable="true" class="w-full outline-none font-noto-serif" style="font-size: 10px; line-height: 1.8; color: #111111; padding: 40px;" spellcheck="false">이곳에 발췌할 로그를 붙여넣으세요. </div>
+                <!-- 종이 질감 오버레이 -->
+                <div id="texture-overlay" class="absolute inset-0 z-10 pointer-events-none transition-opacity duration-200 opacity-0"></div>
+                
+                <div id="editor" contenteditable="true" class="w-full outline-none font-noto-serif relative z-20" style="font-size: 10px; line-height: 1.8; letter-spacing: -0.5px; color: #111111; padding: 40px;" spellcheck="false">이곳에 발췌할 로그를 붙여넣으세요. </div>
             </div>
         </div>
     </main>
@@ -590,9 +694,85 @@
     <script>
         let currentBgColor = '#ffffff';
         let currentTextColor = '#111111';
-        let previewImages = [];
+        let lastToolbarColor = '#9333ea';
+        let lastHighlightColor = 'rgba(253, 224, 71, 0.4)';
         
+        let gradColor1 = '#fbcfe8';
+        let gradColor2 = '#93c5fd';
+
+        let previewImages = [];
         let savedSelectionRange = null;
+
+        // Pickr 설정 공통 옵션
+        const pickrConfig = {
+            theme: 'classic',
+            swatches: ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#111111', '#ffffff'],
+            components: {
+                preview: true, opacity: false, hue: true,
+                interaction: { hex: true, input: true, clear: false, save: true }
+            }
+        };
+
+        const highlightPickrConfig = {
+            theme: 'classic',
+            swatches: ['rgba(253, 224, 71, 0.4)', 'rgba(134, 239, 172, 0.4)', 'rgba(147, 197, 253, 0.4)', 'rgba(249, 168, 212, 0.4)'],
+            components: {
+                preview: true, opacity: true, hue: true,
+                interaction: { hex: false, rgba: true, input: true, clear: false, save: true }
+            }
+        };
+
+        let bgPickr, textPickr, toolbarPickr, highlightPickr, gradPickr1, gradPickr2;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Pickr 초기화
+            bgPickr = Pickr.create({ el: '#bgPickr', default: '#ffffff', ...pickrConfig });
+            bgPickr.on('save', (color) => { applyCustomColor('bg', color.toHEXA().toString()); bgPickr.hide(); });
+            bgPickr.on('change', (color) => { applyCustomColor('bg', color.toHEXA().toString()); });
+
+            textPickr = Pickr.create({ el: '#textPickr', default: '#111111', ...pickrConfig });
+            textPickr.on('save', (color) => { applyCustomColor('text', color.toHEXA().toString()); textPickr.hide(); });
+            textPickr.on('change', (color) => { applyCustomColor('text', color.toHEXA().toString()); });
+
+            toolbarPickr = Pickr.create({ el: '#toolbarPickr', default: '#9333ea', ...pickrConfig });
+            toolbarPickr.on('save', (color) => {
+                lastToolbarColor = color.toHEXA().toString();
+                document.getElementById('lastCustomColorBtn').style.backgroundColor = lastToolbarColor;
+                execCmd('foreColor', lastToolbarColor);
+                toolbarPickr.hide();
+            });
+
+            highlightPickr = Pickr.create({ el: '#highlightPickr', default: 'rgba(253, 224, 71, 0.4)', ...highlightPickrConfig });
+            highlightPickr.on('save', (color) => {
+                lastHighlightColor = color.toRGBA().toString();
+                document.getElementById('lastHighlightColorBtn').style.backgroundColor = lastHighlightColor;
+                applyHighlight();
+                highlightPickr.hide();
+            });
+
+            // 그라데이션 Pickr 초기화
+            gradPickr1 = Pickr.create({ el: '#gradPickr1', default: '#fbcfe8', ...pickrConfig });
+            gradPickr1.on('save', (color) => { gradColor1 = color.toHEXA().toString(); updateGlobalStyles(); gradPickr1.hide(); });
+            gradPickr1.on('change', (color) => { gradColor1 = color.toHEXA().toString(); updateGlobalStyles(); });
+
+            gradPickr2 = Pickr.create({ el: '#gradPickr2', default: '#93c5fd', ...pickrConfig });
+            gradPickr2.on('save', (color) => { gradColor2 = color.toHEXA().toString(); updateGlobalStyles(); gradPickr2.hide(); });
+            gradPickr2.on('change', (color) => { gradColor2 = color.toHEXA().toString(); updateGlobalStyles(); });
+
+            // 자동 저장 내역 로드
+            const savedLog = localStorage.getItem('autoSavedLog');
+            const editorNode = document.getElementById('editor');
+            if (savedLog && savedLog.trim() !== '' && savedLog.trim() !== '이곳에 발췌할 로그를 붙여넣으세요.') {
+                if (confirm("이전에 작업하던 로그 내용이 있습니다. 불러오시겠습니까?")) {
+                    editorNode.innerHTML = savedLog;
+                }
+            }
+
+            const observer = new MutationObserver(() => {
+                localStorage.setItem('autoSavedLog', editorNode.innerHTML);
+            });
+            observer.observe(editorNode, { childList: true, subtree: true, characterData: true });
+        });
 
         document.addEventListener('selectionchange', () => {
             const sel = window.getSelection();
@@ -611,19 +791,44 @@
             document.execCommand('insertText', false, text);
         });
 
+        async function pasteFromClipboard() {
+            if(confirm('이미 입력된 내용이 모두 지워집니다. 클립보드의 내용으로 덮어쓰시겠습니까?')) {
+                try {
+                    const text = await navigator.clipboard.readText();
+                    const editor = document.getElementById('editor');
+                    editor.focus();
+                    document.execCommand('selectAll', false, null);
+                    document.execCommand('insertText', false, text);
+                } catch (err) {
+                    alert('클립보드 접근에 실패했습니다. 브라우저 권한을 확인해주시거나 직접 붙여넣기(Ctrl+V) 해주세요.');
+                }
+            }
+        }
+
         function toggleMobileMenu() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('hidden');
             sidebar.classList.toggle('flex');
         }
 
-        // 도움말 팝업 연동
         function openHelp() {
             document.getElementById('helpModal').classList.remove('hidden');
         }
 
         function closeHelp() {
             document.getElementById('helpModal').classList.add('hidden');
+        }
+
+        function toggleBgMode() {
+            const mode = document.querySelector('input[name="bgMode"]:checked').value;
+            if (mode === 'solid') {
+                document.getElementById('solidBgArea').classList.remove('hidden');
+                document.getElementById('gradientBgArea').classList.add('hidden');
+            } else {
+                document.getElementById('solidBgArea').classList.add('hidden');
+                document.getElementById('gradientBgArea').classList.remove('hidden');
+            }
+            updateGlobalStyles();
         }
 
         function syncPadding(type, value) {
@@ -659,12 +864,12 @@
 
             if (type === 'bg') {
                 currentBgColor = color;
-                document.getElementById('customBgColor').value = color;
                 document.getElementById('customBgHex').value = color;
+                if (bgPickr) bgPickr.setColor(color);
             } else if (type === 'text') {
                 currentTextColor = color;
-                document.getElementById('customTextColor').value = color;
                 document.getElementById('customTextHex').value = color;
+                if (textPickr) textPickr.setColor(color);
             }
             updateGlobalStyles();
         }
@@ -680,13 +885,56 @@
 
             if (type === 'bg') {
                 currentBgColor = hex;
-                if (/^#[0-9A-F]{6}$/i.test(hex)) document.getElementById('customBgColor').value = hex;
                 document.getElementById('customBgHex').value = hex;
+                if (bgPickr) bgPickr.setColor(hex);
             } else if (type === 'text') {
                 currentTextColor = hex;
-                if (/^#[0-9A-F]{6}$/i.test(hex)) document.getElementById('customTextColor').value = hex;
                 document.getElementById('customTextHex').value = hex;
+                if (textPickr) textPickr.setColor(hex);
             }
+            updateGlobalStyles();
+        }
+
+        function resetAllSettings() {
+            if(!confirm('모든 서식과 테마 설정을 기본값으로 초기화하시겠습니까? (입력된 텍스트는 유지됩니다)')) return;
+
+            document.getElementById('globalFont').value = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+            document.getElementById('globalFontSize').value = "10px";
+            document.getElementById('globalLineHeight').value = "1.8";
+            document.getElementById('globalLetterSpacing').value = "-0.5";
+            document.getElementById('globalWordBreak').value = "keep-all";
+            document.getElementById('globalIndent').checked = false;
+            
+            document.getElementById('globalPadding').value = "40";
+            document.getElementById('paddingTop').value = "40";
+            document.getElementById('paddingBottom').value = "40";
+            document.getElementById('paddingLeft').value = "40";
+            document.getElementById('paddingRight').value = "40";
+            
+            document.getElementById('globalPaddingVal').innerText = "40px";
+            document.getElementById('paddingTopVal').innerText = "40px";
+            document.getElementById('paddingBottomVal').innerText = "40px";
+            document.getElementById('paddingLeftVal').innerText = "40px";
+            document.getElementById('paddingRightVal').innerText = "40px";
+
+            document.getElementById('paperTexture').value = "none";
+            document.getElementById('imageRatio').value = "1.5";
+            document.getElementById('quoteStyle').value = "smart";
+            document.getElementById('autoTrim').checked = true;
+
+            document.querySelector(`input[name="bgMode"][value="solid"]`).checked = true;
+            toggleBgMode();
+
+            gradColor1 = '#fbcfe8';
+            gradColor2 = '#93c5fd';
+            if(gradPickr1) gradPickr1.setColor(gradColor1);
+            if(gradPickr2) gradPickr2.setColor(gradColor2);
+            document.getElementById('gradDirection').value = "to bottom";
+
+            applyCustomColor('bg', "#ffffff");
+            applyCustomColor('text', "#111111");
+            
+            toggleTexture();
             updateGlobalStyles();
         }
 
@@ -697,9 +945,11 @@
             const fontFamily = document.getElementById('globalFont').value;
             const fontSize = document.getElementById('globalFontSize').value;
             const lineHeight = document.getElementById('globalLineHeight').value;
-            const letterSpacing = (document.getElementById('globalLetterSpacing').value / 100) + 'em';
+            const letterSpacing = document.getElementById('globalLetterSpacing').value + 'px';
             const wordBreak = document.getElementById('globalWordBreak').value;
             
+            document.getElementById('globalLetterSpacingVal').innerText = letterSpacing;
+
             const pt = document.getElementById('paddingTop').value + 'px';
             const pb = document.getElementById('paddingBottom').value + 'px';
             const pl = document.getElementById('paddingLeft').value + 'px';
@@ -721,15 +971,33 @@
                 editor.style.textAlign = 'justify';
             }
 
-            wrapper.style.backgroundColor = currentBgColor;
+            if(document.getElementById('globalIndent').checked) {
+                editor.classList.add('indent-active');
+            } else {
+                editor.classList.remove('indent-active');
+            }
+
+            // 배경 모드 처리
+            const bgMode = document.querySelector('input[name="bgMode"]:checked').value;
+            if (bgMode === 'solid') {
+                wrapper.style.background = currentBgColor;
+            } else {
+                const dir = document.getElementById('gradDirection').value;
+                wrapper.style.background = `linear-gradient(${dir}, ${gradColor1}, ${gradColor2})`;
+            }
         }
 
         function toggleTexture() {
-            const wrapper = document.getElementById('export-wrapper');
-            if(document.getElementById('paperTexture').checked) {
-                wrapper.classList.add('paper-texture');
+            const overlay = document.getElementById('texture-overlay');
+            const val = document.getElementById('paperTexture').value;
+            
+            overlay.className = 'absolute inset-0 z-10 pointer-events-none transition-opacity duration-200';
+            
+            if (val !== 'none') {
+                overlay.classList.add('texture-' + val);
+                overlay.style.opacity = '1';
             } else {
-                wrapper.classList.remove('paper-texture');
+                overlay.style.opacity = '0';
             }
         }
 
@@ -744,12 +1012,12 @@
             
             let newLines = lines.map(line => {
                 let trimmed = line.trim();
-                if (!trimmed) return ''; 
+                if (!trimmed) return null; // 빈 줄 표시
                 
                 let isWrapped = trimmed.startsWith('*') && trimmed.endsWith('*');
                 let cleaned = trimmed.replace(/\*/g, '').trim();
                 
-                if (!cleaned) return ''; 
+                if (!cleaned) return null; 
                 
                 if (!isWrapped) {
                     if (quoteStyle === 'smart') {
@@ -762,18 +1030,18 @@
                 }
             });
 
-            const finalString = newLines.join('\n');
+            const filteredLines = newLines.filter(line => line !== null);
+            const finalString = filteredLines.join('\n\n'); 
 
             editor.focus();
             document.execCommand('selectAll', false, null);
             document.execCommand('insertText', false, finalString);
         }
 
-        // ★ HTML 및 히든 블록 제거 기능 업데이트
+        // HTML 및 히든 블록 완전 제거 
         function cleanHtmlAndHidden() {
             const editor = document.getElementById('editor');
             
-            // 기존의 에디터 내 숨김 요소 우선 제거
             const elements = editor.querySelectorAll('*');
             elements.forEach(el => {
                 const style = window.getComputedStyle(el);
@@ -782,17 +1050,30 @@
                 }
             });
             
-            let rawText = editor.innerText;
+            let rawText = editor.innerHTML;
             
-            // 정규식을 통한 코드 및 숨겨진 내용 완벽 스윕
-            rawText = rawText.replace(/<!--[\s\S]*?-->/g, ''); // 주석 삭제
-            rawText = rawText.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ''); // 스타일 태그 안의 내용까지 삭제
-            rawText = rawText.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, ''); // 스크립트 삭제
-            rawText = rawText.replace(/<[^>]+>/g, ''); // 기타 모든 HTML 태그 및 인라인 스타일 등 코드 제거
+            // 줄바꿈 보존을 위해 변환
+            rawText = rawText.replace(/<\/div>/gi, '\n');
+            rawText = rawText.replace(/<\/p>/gi, '\n');
+            rawText = rawText.replace(/<br\s*[\/]?>/gi, '\n');
+            
+            rawText = rawText.replace(/<!--[\s\S]*?-->/g, ''); 
+            rawText = rawText.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ''); 
+            rawText = rawText.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, ''); 
+            rawText = rawText.replace(/```[\s\S]*?```/g, ''); // 코드블럭 완전 삭제
+            rawText = rawText.replace(/<[^>]+>/g, ''); // 남은 모든 태그 삭제
+            
+            // 디코딩 및 텍스트 추출 ( textarea를 이용해 엔티티 변환 )
+            const temp = document.createElement('textarea');
+            temp.innerHTML = rawText;
+            let finalStr = temp.value;
+            
+            finalStr = finalStr.replace(/```/g, ''); // 문자로만 남은 백틱도 삭제
+            finalStr = finalStr.replace(/\n{3,}/g, '\n\n').trim();
             
             editor.focus();
             document.execCommand('selectAll', false, null);
-            document.execCommand('insertText', false, rawText);
+            document.execCommand('insertText', false, finalStr);
         }
 
         function applyMarkdown() {
@@ -800,10 +1081,12 @@
             let rawText = editor.innerText;
             if (!rawText.trim()) return;
 
-            rawText = rawText.replace(/\*\((.*?)\)\*/g, '<em>($1)</em>');
+            rawText = rawText.replace(/\*(.*?)\*/g, '<em>$1</em>');
 
             marked.setOptions({ breaks: true, gfm: true });
             let html = marked.parse(rawText);
+            
+            html = html.replace(/<p>/g, '').replace(/<\/p>/g, '<br>');
 
             editor.focus();
             document.execCommand('selectAll', false, null);
@@ -832,9 +1115,23 @@
             document.getElementById('editor').focus();
         }
 
+        function applyHighlight() {
+            if (savedSelectionRange) {
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(savedSelectionRange);
+            }
+            
+            document.execCommand('styleWithCSS', false, true);
+            document.execCommand('hiliteColor', false, lastHighlightColor);
+            
+            document.getElementById('editor').focus();
+        }
+
         function clearFormatting() {
             document.execCommand('removeFormat', false, null);
             document.execCommand('hiliteColor', false, 'transparent');
+            document.execCommand('backColor', false, 'transparent');
             document.execCommand('foreColor', false, currentTextColor);
         }
 
@@ -843,17 +1140,11 @@
             document.getElementById('previewContainer').innerHTML = ''; 
         }
 
-        function findSafeCutY(ctx, width, startY, targetHeight, minHeight, bgColorHex) {
+        // 투명 캡처를 기반으로 알파 채널 검사 방식을 이용한 여백 자르기
+        function findSafeCutY(ctx, width, startY, targetHeight, minHeight) {
             if (startY + targetHeight >= ctx.canvas.height) {
                 return ctx.canvas.height - startY;
             }
-            
-            let hex = bgColorHex.replace(/^#/, '');
-            if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
-            const bigint = parseInt(hex, 16);
-            const r = (bigint >> 16) & 255;
-            const g = (bigint >> 8) & 255;
-            const b = bigint & 255;
             
             const checkHeight = Math.floor(targetHeight - minHeight);
             if (checkHeight <= 0) return targetHeight;
@@ -865,7 +1156,8 @@
                 let isBlank = true;
                 for (let x = 0; x < width; x += 8) {
                     const i = (y * width + x) * 4;
-                    if (Math.abs(data[i] - r) > 5 || Math.abs(data[i+1] - g) > 5 || Math.abs(data[i+2] - b) > 5) {
+                    // 알파 채널이 거의 투명하면 글씨가 없는 것으로 간주
+                    if (data[i+3] > 10) {
                         isBlank = false;
                         break;
                     }
@@ -887,9 +1179,10 @@
             const downloadBtn = document.getElementById('downloadBtn');
             const wrapper = document.getElementById('export-wrapper');
             
-            const hasTexture = document.getElementById('paperTexture').checked;
             const autoTrim = document.getElementById('autoTrim').checked;
             const originalMinHeight = wrapper.style.minHeight;
+            const bgMode = document.querySelector('input[name="bgMode"]:checked').value;
+            const originalBg = wrapper.style.background;
             
             previewImages = [];
             container.innerHTML = '';
@@ -899,16 +1192,17 @@
             modal.classList.remove('hidden');
 
             document.getElementById('editor').blur();
-
-            if (hasTexture) wrapper.classList.remove('paper-texture');
             if (autoTrim) wrapper.style.minHeight = '0px'; 
+            
+            // 그라데이션 및 정확한 자르기를 위해 배경을 일시적으로 투명하게 만듦
+            wrapper.style.background = 'transparent';
 
             try {
                 await new Promise(r => setTimeout(r, 150));
 
                 const fullCanvas = await html2canvas(wrapper, {
                     scale: 4, 
-                    backgroundColor: currentBgColor,
+                    backgroundColor: null, // 투명으로 캡처
                     useCORS: true,
                     logging: false,
                     allowTaint: true,
@@ -916,6 +1210,9 @@
                     windowWidth: wrapper.scrollWidth,
                     windowHeight: wrapper.scrollHeight
                 });
+
+                // 캡처 후 배경 원복
+                wrapper.style.background = originalBg;
 
                 const fullCtx = fullCanvas.getContext('2d');
                 const ratioVal = document.getElementById('imageRatio').value;
@@ -933,16 +1230,25 @@
                     sliceCanvas.width = width;
                     sliceCanvas.height = totalHeight;
                     const ctx = sliceCanvas.getContext('2d');
-                    ctx.drawImage(fullCanvas, 0, 0);
                     
-                    if (hasTexture) {
-                        ctx.fillStyle = "rgba(0,0,0,0.01)";
-                        for (let x = 0; x < width; x += 8) { 
-                            for (let y = 0; y < totalHeight; y += 8) {
-                                if (Math.random() > 0.6) ctx.fillRect(x, y, 4, 4); 
-                            }
-                        }
+                    // 배경 채우기
+                    if (bgMode === 'gradient') {
+                        const dir = document.getElementById('gradDirection').value;
+                        let grad;
+                        if (dir === 'to right') grad = ctx.createLinearGradient(0, 0, width, 0);
+                        else if (dir === 'to bottom right') grad = ctx.createLinearGradient(0, 0, width, totalHeight);
+                        else if (dir === 'to top right') grad = ctx.createLinearGradient(0, totalHeight, width, 0);
+                        else grad = ctx.createLinearGradient(0, 0, 0, totalHeight); 
+                        grad.addColorStop(0, gradColor1);
+                        grad.addColorStop(1, gradColor2);
+                        ctx.fillStyle = grad;
+                    } else {
+                        ctx.fillStyle = currentBgColor;
                     }
+                    ctx.fillRect(0, 0, width, totalHeight);
+                    
+                    // 원본 콘텐츠 그리기
+                    ctx.drawImage(fullCanvas, 0, 0);
                     
                     const imgUrl = sliceCanvas.toDataURL("image/png", 1.0);
                     previewImages.push(imgUrl);
@@ -986,7 +1292,8 @@
                         if (currentY + sliceHeightToDraw >= totalHeight) {
                             sliceHeightToDraw = totalHeight - currentY;
                         } else {
-                            sliceHeightToDraw = findSafeCutY(fullCtx, width, currentY, sliceHeightToDraw, availableContentH * 0.5, currentBgColor);
+                            // 투명 바탕에서 알파 채널을 통해 빈 공간 확인
+                            sliceHeightToDraw = findSafeCutY(fullCtx, width, currentY, sliceHeightToDraw, availableContentH * 0.5);
                         }
                         
                         let ACTUAL_SLICE_HEIGHT = SLICE_HEIGHT;
@@ -1001,23 +1308,28 @@
                         sliceCanvas.height = ACTUAL_SLICE_HEIGHT;
                         const ctx = sliceCanvas.getContext('2d');
                         
-                        ctx.fillStyle = currentBgColor;
+                        // 배경 채우기 (각 페이지마다 새로운 그라데이션)
+                        if (bgMode === 'gradient') {
+                            const dir = document.getElementById('gradDirection').value;
+                            let grad;
+                            if (dir === 'to right') grad = ctx.createLinearGradient(0, 0, width, 0);
+                            else if (dir === 'to bottom right') grad = ctx.createLinearGradient(0, 0, width, ACTUAL_SLICE_HEIGHT);
+                            else if (dir === 'to top right') grad = ctx.createLinearGradient(0, ACTUAL_SLICE_HEIGHT, width, 0);
+                            else grad = ctx.createLinearGradient(0, 0, 0, ACTUAL_SLICE_HEIGHT); 
+                            grad.addColorStop(0, gradColor1);
+                            grad.addColorStop(1, gradColor2);
+                            ctx.fillStyle = grad;
+                        } else {
+                            ctx.fillStyle = currentBgColor;
+                        }
                         ctx.fillRect(0, 0, width, ACTUAL_SLICE_HEIGHT);
 
+                        // 투명으로 캡처된 원본 글씨 그리기
                         ctx.drawImage(
                             fullCanvas,
                             0, currentY, width, sliceHeightToDraw, 
                             0, drawOffsetY, width, sliceHeightToDraw
                         );
-
-                        if (hasTexture) {
-                            ctx.fillStyle = "rgba(0,0,0,0.01)";
-                            for (let x = 0; x < width; x += 8) { 
-                                for (let y = 0; y < ACTUAL_SLICE_HEIGHT; y += 8) {
-                                    if (Math.random() > 0.6) ctx.fillRect(x, y, 4, 4); 
-                                }
-                            }
-                        }
                         
                         const imgUrl = sliceCanvas.toDataURL("image/png", 1.0);
                         previewImages.push(imgUrl);
@@ -1053,7 +1365,7 @@
                 console.error(err);
                 statusText.innerText = "오류가 발생했습니다. 새로고침 해주세요.";
             } finally {
-                if (hasTexture) wrapper.classList.add('paper-texture');
+                wrapper.style.background = originalBg; // 혹시나 에러 났을 때 원복
                 if (autoTrim) wrapper.style.minHeight = originalMinHeight || '200px';
             }
         }
@@ -1100,20 +1412,29 @@
             const name = prompt("저장할 프리셋 이름을 입력하세요:");
             if (!name) return;
 
+            const bgMode = document.querySelector('input[name="bgMode"]:checked').value;
+
             const preset = {
                 font: document.getElementById('globalFont').value,
                 fontSize: document.getElementById('globalFontSize').value,
                 lineHeight: document.getElementById('globalLineHeight').value,
                 letterSpacing: document.getElementById('globalLetterSpacing').value,
                 wordBreak: document.getElementById('globalWordBreak').value,
+                indent: document.getElementById('globalIndent').checked,
                 padding: document.getElementById('globalPadding').value,
                 paddingTop: document.getElementById('paddingTop').value,
                 paddingBottom: document.getElementById('paddingBottom').value,
                 paddingLeft: document.getElementById('paddingLeft').value,
                 paddingRight: document.getElementById('paddingRight').value,
+                
+                bgMode: bgMode,
                 bgColor: currentBgColor,
+                gradColor1: gradColor1,
+                gradColor2: gradColor2,
+                gradDirection: document.getElementById('gradDirection').value,
+                
                 textColor: currentTextColor,
-                texture: document.getElementById('paperTexture').checked,
+                texture: document.getElementById('paperTexture').value,
                 ratio: document.getElementById('imageRatio').value,
                 quoteStyle: document.getElementById('quoteStyle').value,
                 autoTrim: document.getElementById('autoTrim').checked
@@ -1139,8 +1460,9 @@
             document.getElementById('globalFont').value = preset.font || "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
             document.getElementById('globalFontSize').value = preset.fontSize || "10px";
             document.getElementById('globalLineHeight').value = preset.lineHeight || "1.8";
-            document.getElementById('globalLetterSpacing').value = preset.letterSpacing || "-3";
+            document.getElementById('globalLetterSpacing').value = preset.letterSpacing || "-0.5";
             document.getElementById('globalWordBreak').value = preset.wordBreak || "keep-all";
+            document.getElementById('globalIndent').checked = preset.indent || false;
             
             document.getElementById('globalPadding').value = preset.padding || "40";
             document.getElementById('paddingTop').value = preset.paddingTop || "40";
@@ -1154,10 +1476,20 @@
             document.getElementById('paddingLeftVal').innerText = (preset.paddingLeft || "40") + 'px';
             document.getElementById('paddingRightVal').innerText = (preset.paddingRight || "40") + 'px';
 
-            document.getElementById('paperTexture').checked = preset.texture || false;
+            document.getElementById('paperTexture').value = preset.texture || "none";
             document.getElementById('imageRatio').value = preset.ratio || "1.5";
             document.getElementById('quoteStyle').value = preset.quoteStyle || "smart";
             document.getElementById('autoTrim').checked = preset.autoTrim !== undefined ? preset.autoTrim : true;
+
+            const mode = preset.bgMode || 'solid';
+            document.querySelector(`input[name="bgMode"][value="${mode}"]`).checked = true;
+            toggleBgMode();
+
+            gradColor1 = preset.gradColor1 || '#fbcfe8';
+            gradColor2 = preset.gradColor2 || '#93c5fd';
+            if(gradPickr1) gradPickr1.setColor(gradColor1);
+            if(gradPickr2) gradPickr2.setColor(gradColor2);
+            document.getElementById('gradDirection').value = preset.gradDirection || 'to bottom';
 
             applyCustomColor('bg', preset.bgColor || "#ffffff");
             applyCustomColor('text', preset.textColor || "#111111");
@@ -1183,20 +1515,6 @@
        updateGlobalStyles();
        updatePresetList();
 
-       window.addEventListener('DOMContentLoaded', () => {
-           const savedLog = localStorage.getItem('autoSavedLog');
-           const editorNode = document.getElementById('editor');
-           if (savedLog && savedLog.trim() !== '') {
-               editorNode.innerHTML = savedLog;
-           }
-
-           const observer = new MutationObserver(() => {
-               localStorage.setItem('autoSavedLog', editorNode.innerHTML);
-           });
-           observer.observe(editorNode, { childList: true, subtree: true, characterData: true });
-       });
     </script>
 </body>
 </html>
-
-

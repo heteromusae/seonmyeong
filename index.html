@@ -476,19 +476,23 @@
                         </div>
 
                         <div class="grid grid-cols-2 gap-2 mb-2">
-                            <div>
-                                <label class="block text-[10px] text-gray-500 mb-1">시작 색상</label>
-                                <div class="flex items-center gap-1 grad-pickr">
-                                    <div id="gradPickr1"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] text-gray-500 mb-1">끝 색상</label>
-                                <div class="flex items-center gap-1 grad-pickr">
-                                    <div id="gradPickr2"></div>
-                                </div>
-                            </div>
-                        </div>
+    <div>
+        <label class="block text-[10px] text-gray-500 mb-1">시작 색상</label>
+        <div class="flex items-center gap-1 grad-pickr">
+            <div id="gradPickr1"></div>
+        </div>
+    </div>
+    <div>
+        <div class="flex justify-between items-center mb-1">
+            <label class="block text-[10px] text-gray-500">끝 색상</label>
+            <button onclick="generateAutoAnalogousColor()" class="text-[9px] text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 px-1.5 py-0.5 rounded transition shadow-sm">자동 그라데이션</button>
+        </div>
+        <div class="flex items-center gap-1 grad-pickr">
+            <div id="gradPickr2"></div>
+        </div>
+    </div>
+</div>
+
                         <div class="mb-3">
                             <label class="block text-[10px] text-gray-500 mb-1">방향</label>
                             <select id="gradDirection" class="w-full border border-gray-300 rounded p-1 text-xs outline-none focus:border-indigo-500" onchange="updateGlobalStyles()">
@@ -1422,7 +1426,73 @@
             }
             return targetHeight; 
         }
-        
+                /* --- 그라데이션 자동 연한 유사색 생성 로직 --- */
+        function hexToHSL(H) {
+            let r = 0, g = 0, b = 0;
+            if (H.length === 4) {
+                r = "0x" + H[1] + H[1]; g = "0x" + H[2] + H[2]; b = "0x" + H[3] + H[3];
+            } else if (H.length === 7) {
+                r = "0x" + H[1] + H[2]; g = "0x" + H[3] + H[4]; b = "0x" + H[5] + H[6];
+            }
+            r /= 255; g /= 255; b /= 255;
+            let cmin = Math.min(r,g,b), cmax = Math.max(r,g,b), delta = cmax - cmin, h = 0, s = 0, l = 0;
+            if (delta === 0) h = 0;
+            else if (cmax === r) h = ((g - b) / delta) % 6;
+            else if (cmax === g) h = (b - r) / delta + 2;
+            else h = (r - g) / delta + 4;
+            h = Math.round(h * 60);
+            if (h < 0) h += 360;
+            l = (cmax + cmin) / 2;
+            s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+            s = +(s * 100).toFixed(1);
+            l = +(l * 100).toFixed(1);
+            return {h, s, l};
+        }
+
+        function HSLToHex(h, s, l) {
+            s /= 100; l /= 100;
+            let c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c/2, r = 0, g = 0, b = 0;
+            if (0 <= h && h < 60) { r = c; g = x; b = 0; }
+            else if (60 <= h && h < 120) { r = x; g = c; b = 0; }
+            else if (120 <= h && h < 180) { r = 0; g = c; b = x; }
+            else if (180 <= h && h < 240) { r = 0; g = x; b = c; }
+            else if (240 <= h && h < 300) { r = x; g = 0; b = c; }
+            else if (300 <= h && h < 360) { r = c; g = 0; b = x; }
+            r = Math.round((r + m) * 255).toString(16).padStart(2, '0');
+            g = Math.round((g + m) * 255).toString(16).padStart(2, '0');
+            b = Math.round((b + m) * 255).toString(16).padStart(2, '0');
+            return "#" + r + g + b;
+        }
+
+                            
+ function generateAutoAnalogousColor() {
+            let hsl = hexToHSL(gradColor1);
+            
+            // 색상(Hue)을 약간 이동하여 유사색을 만듦 (25도)
+            let newH = (hsl.h + 25) % 360;
+            
+            // 밝기(Lightness)를 올려 연하게 만듦 (최소 30% 이상)
+            let newL = Math.min(97, hsl.l + 25);
+            if(newL < 30) newL = 30;
+            
+            // 채도(Saturation)는 파스텔톤을 위해 살짝 조정
+            let newS = Math.max(15, hsl.s - 5);
+            
+            let newHex = HSLToHex(newH, newS, newL);
+            
+            gradColor2 = newHex;
+            
+            // Pickr UI 및 화면 배경 업데이트 적용
+            if(gradPickr2) {
+                isSyncingGrad2 = true;
+                gradPickr2.setColor(newHex);
+                isSyncingGrad2 = false;
+            }
+            updateGlobalStyles();
+        }
+
+        /* ---------------------------------------------------- */
+
         function mixHexColors(c1, c2, percent) {
             const parse = c => {
                 let hex = c.replace('#', '');

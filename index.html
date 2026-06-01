@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -73,6 +73,24 @@
     font-family: 'Yangjin';
     src: url('https://cdn.jsdelivr.net/gh/supernovice-lab/font@0.9/yangjin.woff') format('woff');
     font-weight: normal;
+    font-display: swap;
+        }
+        @font-face {
+    font-family: 'BookkMyungjo';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/BookkMyungjo-Lt.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+        }
+        @font-face {
+    font-family: 'Cafe24SuperMagic';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2307-2@1.0/Cafe24Supermagic-Regular-v1.0.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+        }
+        @font-face {
+    font-family: 'GyeonggiMillenniumBackground';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2410-3@1.0/Batang_Regular.woff') format('woff');
+    font-weight: 400;
     font-display: swap;
         }
 
@@ -305,7 +323,10 @@
                             <option value="'Noto Serif KR', serif" selected>Noto Serif KR</option>
                             <option value="'Nanum Myeongjo', serif">나눔명조</option>
                             <option value="'Gowun Batang', serif">고운바탕</option>
+                            <option value="'BookkMyungjo', serif">부크크 명조</option>
                             <option value="'ChosunIlboMyungjo', serif">조선일보명조체</option>
+                            <option value="'GyeonggiMillenniumBackground', serif">경기천년바탕</option>
+                            <option value="'Cafe24SuperMagic', serif">카페24 슈퍼매직</option>
                         </optgroup>
                         <optgroup label="고딕체">
                             <option value="'Noto Sans KR', sans-serif">Noto Sans KR</option>
@@ -472,10 +493,14 @@
                         <div class="mb-3">
                             <label class="block text-[10px] text-gray-500 mb-1">방향</label>
                             <select id="gradDirection" class="w-full border border-gray-300 rounded p-1 text-xs outline-none focus:border-indigo-500" onchange="updateGlobalStyles()">
+                                <option value="to top">↑</option>
                                 <option value="to bottom" selected>↓</option>
+                                <option value="to left">←</option>
                                 <option value="to right">→</option>
-                                <option value="to bottom right">↘</option>
+                                <option value="to top left">↖</option>
                                 <option value="to top right">↗</option>
+                                <option value="to bottom left">↙</option>
+                                <option value="to bottom right">↘</option>
                             </select>
                         </div>
                         <div>
@@ -571,19 +596,22 @@
                 <div>
                     <label class="block text-xs font-medium mb-1 text-gray-700">최종 캡처 비율 (자르기)</label>
                     <select id="imageRatio" class="w-full border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-indigo-500 bg-gray-50">
-                        <optgroup label="세로형 (단행본/모바일)">
-                            <option value="1.5" selected>1 : 1.5 (소설책 단행본 - 추천)</option>
-                            <option value="1.414">1 : 1.414 (A4 용지)</option>
-                            <option value="1.25">4 : 5 (인스타 세로)</option>
-                            <option value="2.0">1 : 2 (웹소설 뷰어)</option>
+                        <optgroup label="세로형">
+                            <option value="1.5" selected>1 : 1.5 (추천)</option>
+                            <option value="1.414">1 : 1.414</option>
+                            <option value="1.25">4 : 5</option>
+                            <option value="2.0">1 : 2</option>
                         </optgroup>
-                        <optgroup label="가로형 (PC/배경화면)">
-                            <option value="0.5625">16 : 9 (와이드 가로형)</option>
-                            <option value="0.75">4 : 3 (표준 가로형)</option>
-                            <option value="0.428">21 : 9 (영화 비율 가로형)</option>
+                        <optgroup label="가로형">
+                            <option value="0.8">5 : 4</option>
+                            <option value="0.75">4 : 3</option>
+                            <option value="0.6667">3 : 2</option>
+                            <option value="0.625">16 : 10</option>
+                            <option value="0.5625">16 : 9</option>
+                            
                         </optgroup>
                         <optgroup label="기타">
-                            <option value="1.0">1 : 1 (정방형)</option>
+                            <option value="1.0">1 : 1</option>
                             <option value="auto">비율 무시 (자르지 않고 통째로 1장 캡처)</option>
                         </optgroup>
                     </select>
@@ -1480,9 +1508,14 @@
                         const dir = document.getElementById('gradDirection').value;
                         const gradPos = document.getElementById('gradPos').value;
                         let grad;
-                        if (dir === 'to right') grad = ctx.createLinearGradient(0, 0, width, 0);
-                        else if (dir === 'to bottom right') grad = ctx.createLinearGradient(0, 0, width, totalHeight);
+                        if (dir === 'to top') grad = ctx.createLinearGradient(0, totalHeight, 0, 0);
+                        else if (dir === 'to bottom') grad = ctx.createLinearGradient(0, 0, 0, totalHeight);
+                        else if (dir === 'to left') grad = ctx.createLinearGradient(width, 0, 0, 0);
+                        else if (dir === 'to right') grad = ctx.createLinearGradient(0, 0, width, 0);
+                        else if (dir === 'to top left') grad = ctx.createLinearGradient(width, totalHeight, 0, 0);
                         else if (dir === 'to top right') grad = ctx.createLinearGradient(0, totalHeight, width, 0);
+                        else if (dir === 'to bottom left') grad = ctx.createLinearGradient(width, 0, 0, totalHeight);
+                        else if (dir === 'to bottom right') grad = ctx.createLinearGradient(0, 0, width, totalHeight);
                         else grad = ctx.createLinearGradient(0, 0, 0, totalHeight); 
                         
                         grad.addColorStop(0, gradColor1);
@@ -1557,9 +1590,14 @@
                             const dir = document.getElementById('gradDirection').value;
                             const gradPos = document.getElementById('gradPos').value;
                             let grad;
-                            if (dir === 'to right') grad = ctx.createLinearGradient(0, 0, width, 0);
-                            else if (dir === 'to bottom right') grad = ctx.createLinearGradient(0, 0, width, ACTUAL_SLICE_HEIGHT);
+                            if (dir === 'to top') grad = ctx.createLinearGradient(0, ACTUAL_SLICE_HEIGHT, 0, 0);
+                            else if (dir === 'to bottom') grad = ctx.createLinearGradient(0, 0, 0, ACTUAL_SLICE_HEIGHT);
+                            else if (dir === 'to left') grad = ctx.createLinearGradient(width, 0, 0, 0);
+                            else if (dir === 'to right') grad = ctx.createLinearGradient(0, 0, width, 0);
+                            else if (dir === 'to top left') grad = ctx.createLinearGradient(width, ACTUAL_SLICE_HEIGHT, 0, 0);
                             else if (dir === 'to top right') grad = ctx.createLinearGradient(0, ACTUAL_SLICE_HEIGHT, width, 0);
+                            else if (dir === 'to bottom left') grad = ctx.createLinearGradient(width, 0, 0, ACTUAL_SLICE_HEIGHT);
+                            else if (dir === 'to bottom right') grad = ctx.createLinearGradient(0, 0, width, ACTUAL_SLICE_HEIGHT);
                             else grad = ctx.createLinearGradient(0, 0, 0, ACTUAL_SLICE_HEIGHT); 
                             
                             grad.addColorStop(0, gradColor1);

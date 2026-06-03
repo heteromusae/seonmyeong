@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>로그 발췌 툴</title>
+    <title>로그 발췌 툴 aka 헴로그</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -471,7 +471,7 @@
                             
                             <button class="color-swatch" data-type="grad" data-c1="#232526" data-c2="#414345" style="background: linear-gradient(135deg, #232526, #414345)" onclick="setGradPreset(this, '#232526', '#414345')"></button>
                             <button class="color-swatch" data-type="grad" data-c1="#0f2027" data-c2="#203a43" style="background: linear-gradient(135deg, #0f2027, #203a43)" onclick="setGradPreset(this, '#0f2027', '#203a43')"></button>
-                            <button class="color-swatch" data-type="grad" data-c1="#2c3e50" data-c2="#000000" style="background: linear-gradient(135deg, #2c3e50, #000000)" onclick="setGradPreset(this, '#2c3e50', '#000000')"></button>
+                            <button class="color-swatch" data-type="grad" data-c1="#2c3e50" data-c2="#242424" style="background: linear-gradient(135deg, #2c3e50, #242424)" onclick="setGradPreset(this, '#2c3e50', '#242424')"></button>
                             <button class="color-swatch" data-type="grad" data-c1="#1e130c" data-c2="#3a2f28" style="background: linear-gradient(135deg, #1e130c, #3a2f28)" onclick="setGradPreset(this, '#1e130c', '#3a2f28')"></button>
                         </div>
 
@@ -547,94 +547,175 @@
 
             <hr class="border-gray-100">
 
-            <!-- 대사 자동 변환 기능 -->
+          <!-- 하단 서명 (워터마크) -->
             <div class="space-y-4">
-                <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1">텍스트 변환</h3>
-                
-                <div>
-                    <label class="block text-xs font-medium mb-1 text-gray-700">대사 자동 변환</label>
-                    <div class="flex gap-2">
-                        <select id="quoteStyle" class="flex-1 border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-indigo-500 bg-gray-50">
-                            <option value="smart">“ ” (둥근 따옴표)</option>
-                            <option value="straight">" " (직선 따옴표)</option>
-                        </select>
-                        <button onclick="formatDialogue()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 font-bold py-1.5 px-3 rounded text-xs transition flex-shrink-0">
-                            일괄 변환
-                        </button>
+                <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1">출</h3>
+                <div class="flex gap-2">
+                    <div class="flex-1">
+                        <label class="block text-[10px] text-gray-500 mb-1">제작자</label>
+                        <input type="text" id="watermarkAuthor" class="w-full border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-indigo-500 bg-gray-50" placeholder="예: 제작자명" oninput="saveAutoSettings()">
                     </div>
-                    <p class="text-[10px] text-gray-500 mt-1.5 leading-tight">
-                        별표로 감싸지지 않은 문단에 따옴표를 씌우고, 글 전체의 별표를 삭제합니다. (기존 서식은 초기화됩니다)
-                    </p>
+                    <div class="flex-1">
+                        <label class="block text-[10px] text-gray-500 mb-1">캐릭터</label>
+                        <input type="text" id="watermarkCharacter" class="w-full border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-indigo-500 bg-gray-50" placeholder="예: 캐릭터명" oninput="saveAutoSettings()">
+                    </div>
                 </div>
-
-                <!-- 웹 서식 완전 제거 -->
-                <div class="mt-3 bg-gray-50 p-2.5 rounded border border-gray-200">
-                    <label class="block text-xs font-bold text-gray-600 mb-1">웹 서식 정리</label>
-                    <p class="text-[10px] text-gray-500 mb-2.5 leading-tight">
-                        로그의 style 태그 내용, 숨겨진 텍스트, 코드블럭을 모두 삭제하고 텍스트만 남깁니다.
-                    </p>
-                    <button onclick="cleanHtmlAndHidden()" class="w-full bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 font-bold py-1.5 px-3 rounded text-xs transition shadow-sm">
-                        정리 실행하기
-                    </button>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] text-gray-500 mb-1">폰트</label>
+                        <select id="watermarkFont" class="w-full border border-gray-300 rounded p-1 text-xs outline-none focus:border-indigo-500 bg-gray-50" onchange="saveAutoSettings()">
+                            <option value="auto" selected>본문 폰트 따라가기</option>
+                            <option value="'Noto Serif KR', serif">Noto Serif KR</option>
+                            <option value="'Nanum Myeongjo', serif">나눔명조</option>
+                            <option value="'Gowun Batang', serif">고운바탕</option>
+                            <option value="'BookkMyungjo', serif">부크크 명조</option>
+                            <option value="'ChosunIlboMyungjo', serif">조선일보명조</option>
+                            <option value="'Noto Sans KR', sans-serif">Noto Sans KR</option>
+                            <option value="'Pretendard', sans-serif">프리텐다드</option>
+                            <option value="'OngleipParkDahyeon', sans-serif">온글잎 박다현</option>
+                            <option value="'NeoDonggeunmo', sans-serif">네오둥근모</option>
+                            <option value="'SchoolSafeStoneWall', sans-serif">학교안심 돌담</option>
+                            <option value="'Yeongwol', sans-serif">영월체</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-500 mb-1">색상</label>
+                        <select id="watermarkColor" class="w-full border border-gray-300 rounded p-1 text-xs outline-none focus:border-indigo-500 bg-gray-50" onchange="saveAutoSettings()">
+                            <option value="auto" selected>본문 색상 따라가기</option>
+                            <option value="#9ca3af">연한 회색</option>
+                            <option value="#4b5563">진한 회색</option>
+                            <option value="#000000">검은색</option>
+                            <option value="#ffffff">흰색</option>
+                        </select>
+                    </div>
                 </div>
-
-                <!-- 위아래 빈 줄 제거 -->
-                <div class="mt-3 bg-gray-50 p-2.5 rounded border border-gray-200">
-                    <label class="block text-xs font-bold text-gray-600 mb-1">위아래 여백(빈 줄) 제거</label>
-                    <p class="text-[10px] text-gray-500 mb-2.5 leading-tight">
-                        로그 맨 위와 맨 아래에 들어간 불필요한 엔터(빈 줄)를 일괄 삭제하여 깔끔하게 정리합니다.
-                    </p>
-                    <button onclick="trimEmptyLines()" class="w-full bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 font-bold py-1.5 px-3 rounded text-xs transition shadow-sm">
-                        위아래 빈 줄 지우기
-                    </button>
+               <div class="grid grid-cols-2 gap-2 mt-2">
+                    <div>
+                        <label class="block text-[10px] text-gray-500 mb-1">위치</label>
+                        <select id="watermarkPos" class="w-full border border-gray-300 rounded p-1 text-xs outline-none focus:border-indigo-500 bg-gray-50" onchange="saveAutoSettings()">
+                            <option value="right" selected>오른쪽 아래</option>
+                            <option value="left">왼쪽 아래</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-500 mb-1">크기</label>
+                        <select id="watermarkSize" class="w-full border border-gray-300 rounded p-1 text-xs outline-none focus:border-indigo-500 bg-gray-50" onchange="saveAutoSettings()">
+                            <option value="24">작게</option>
+                            <option value="32">약간 작게</option>
+                            <option value="40" selected>보통 (기본)</option>
+                            <option value="52">약간 크게</option>
+                            <option value="64">크게</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
             <hr class="border-gray-100">
 
-            <!-- 발췌 이미지 설정 -->
+            <!-- 텍스트 / 태그 변환 -->
             <div class="space-y-4">
-                <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1">출력 설정</h3>
+                <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1">텍스트 / 태그 변환</h3>
                 
+                <!-- 일괄 변환 -->
                 <div>
-                    <label class="block text-xs font-medium mb-1 text-gray-700">최종 캡처 비율 (자르기)</label>
-                    <select id="imageRatio" class="w-full border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-indigo-500 bg-gray-50">
-                        <optgroup label="세로형">
-                            <option value="1.5" selected>1 : 1.5 (추천)</option>
-                            <option value="1.414">1 : 1.414</option>
-                            <option value="1.25">4 : 5</option>
-                            <option value="2.0">1 : 2</option>
-                        </optgroup>
-                        <optgroup label="가로형">
-                            <option value="0.8">5 : 4</option>
-                            <option value="0.75">4 : 3</option>
-                            <option value="0.6667">3 : 2</option>
-                            <option value="0.625">16 : 10</option>
-                            <option value="0.5625">16 : 9</option>
-                            
-                        </optgroup>
-                        <optgroup label="기타">
-                            <option value="1.0">1 : 1</option>
-                            <option value="auto">비율 무시 (자르지 않고 통째로 1장 캡처)</option>
-                        </optgroup>
-                    </select>
+                    <div class="flex gap-2 mb-2">
+                        <select id="quoteStyle" class="flex-1 border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-indigo-500 bg-gray-50">
+                            <option value="smart">“ ” (둥근 따옴표)</option>
+                            <option value="straight">" " (직선 따옴표)</option>
+                        </select>
+                        <button onclick="formatDialogue()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 font-bold py-1.5 px-3 rounded text-xs transition flex-shrink-0">
+                            대사 일괄 변환
+                        </button>
+                    </div>
                 </div>
 
-                <div class="flex flex-col gap-3 mt-4 pt-4 border-t border-gray-100">
-                    <label class="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
-                        <input type="checkbox" id="autoTrim" class="rounded text-indigo-600 focus:ring-indigo-500" checked onchange="saveAutoSettings()">
-                        <span>마지막 페이지 여백 자동 자르기</span>
-                    </label>
-                    
+                <!-- 세분화 버튼 -->
+                <div class="bg-gray-50 p-2.5 rounded border border-gray-200 space-y-3">
                     <div>
-                        <label class="block text-xs font-medium mb-1.5 text-gray-700">발췌본 저장 순서</label>
-                        <div class="flex gap-2">
-                            <label class="flex items-center gap-1 text-[10px] cursor-pointer">
-                                <input type="radio" name="dlOrder" value="forward" checked onchange="saveAutoSettings()">정방향 (첫 장부터)
-                            </label>
-                            <label class="flex items-center gap-1 text-[10px] cursor-pointer">
-                                <input type="radio" name="dlOrder" value="reverse" onchange="saveAutoSettings()">역방향 (마지막 장부터)
-                            </label>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">별(*) 기호</label>
+                        <div class="flex gap-1">
+                            <button onclick="modifyTextSpecific('addOneStar')" class="flex-1 bg-white hover:bg-gray-100 border border-gray-300 text-[10px] py-1 rounded transition shadow-sm">+ 1개 추가</button>
+                            <button onclick="modifyTextSpecific('removeOneStar')" class="flex-1 bg-white hover:bg-gray-100 border border-gray-300 text-[10px] py-1 rounded transition shadow-sm text-red-600">- 1개 제거</button>
+                            <button onclick="modifyTextSpecific('removeAllStar')" class="flex-1 bg-white hover:bg-gray-100 border border-gray-300 text-[10px] py-1 rounded transition shadow-sm text-red-600 font-bold">모두 제거</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">따옴표 (" " / ' ')</label>
+                        <div class="flex gap-1 mb-1.5">
+                            <button onclick="modifyTextSpecific('addOneQuote')" class="flex-1 bg-white hover:bg-gray-100 border border-gray-300 text-[10px] py-1 rounded transition shadow-sm">+ 1쌍 추가</button>
+                            <button onclick="modifyTextSpecific('removeOneQuote')" class="flex-1 bg-white hover:bg-gray-100 border border-gray-300 text-[10px] py-1 rounded transition shadow-sm text-red-600">- 1쌍 제거</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-1 text-[10px]">
+                            <button onclick="modifyTextSpecific('toggleDoubleQuote')" class="bg-white hover:bg-gray-100 border border-gray-300 py-1 rounded transition shadow-sm">" " ↔ “ ” 전환</button>
+                            <button onclick="modifyTextSpecific('toggleSingleQuote')" class="bg-white hover:bg-gray-100 border border-gray-300 py-1 rounded transition shadow-sm">' ' ↔ ‘ ’ 전환</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 태그 및 여백 제거 (순서 교체 완료) -->
+                <div class="bg-gray-50 p-3 rounded border border-gray-200 space-y-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">웹 서식 / 빈 줄 제거</label>
+                        <div class="flex gap-1">
+                            <button onclick="cleanHtmlAndHidden()" class="flex-1 bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 py-1.5 px-2 rounded text-[10px] transition shadow-sm">웹 서식 완전 정리</button>
+                            <button onclick="trimEmptyLines()" class="flex-1 bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 py-1.5 px-2 rounded text-[10px] transition shadow-sm">위아래 빈 줄 지우기</button>
+                        </div>
+                    </div>
+                    <hr class="border-gray-200">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">폰트 / 색상 태그만 지우기</label>
+                        <button onclick="removeFontAndColorTags()" class="w-full bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 py-1.5 px-3 rounded text-[11px] font-bold transition shadow-sm">내용 유지하고 태그 삭제</button>
+                        <p class="text-[9px] text-gray-500 mt-1.5 leading-tight text-center">글의 내용은 살리고 &lt;font&gt;, color 등 스타일 태그만 지웁니다.</p>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-gray-100">
+
+            <!-- 발췌 이미지 출력 설정 (여백 개선) -->
+            <div class="space-y-4 pb-4">
+                <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1">출력 설정</h3>
+                
+                <div class="bg-white p-3.5 rounded border border-gray-200 shadow-sm space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold mb-1.5 text-gray-700">최종 캡처 비율 (자르기)</label>
+                        <select id="imageRatio" class="w-full border border-gray-300 rounded p-2 text-xs outline-none focus:border-indigo-500 bg-gray-50">
+                            <optgroup label="세로형">
+                                <option value="1.5" selected>1 : 1.5 (추천)</option>
+                                <option value="1.414">1 : 1.414</option>
+                                <option value="1.25">4 : 5</option>
+                                <option value="2.0">1 : 2</option>
+                            </optgroup>
+                            <optgroup label="가로형">
+                                <option value="0.8">5 : 4</option>
+                                <option value="0.75">4 : 3</option>
+                                <option value="0.6667">3 : 2</option>
+                                <option value="0.625">16 : 10</option>
+                                <option value="0.5625">16 : 9</option>
+                            </optgroup>
+                            <optgroup label="기타">
+                                <option value="1.0">1 : 1</option>
+                                <option value="auto">비율 무시 (자르지 않고 통째로 1장 캡처)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="pt-3 border-t border-gray-100 space-y-3">
+                        <label class="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
+                            <input type="checkbox" id="autoTrim" class="rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5" checked onchange="saveAutoSettings()">
+                            <span>마지막 페이지 여백 자동 자르기</span>
+                        </label>
+                        
+                        <div>
+                            <label class="block text-[11px] font-bold mb-1.5 text-gray-600">발췌본 저장 순서</label>
+                            <div class="flex gap-4 bg-gray-50 p-2.5 rounded border border-gray-100">
+                                <label class="flex items-center gap-1 text-[10px] cursor-pointer">
+                                    <input type="radio" name="dlOrder" value="forward" checked onchange="saveAutoSettings()">정방향
+                                </label>
+                                <label class="flex items-center gap-1 text-[10px] cursor-pointer">
+                                    <input type="radio" name="dlOrder" value="reverse" onchange="saveAutoSettings()">역방향
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -703,8 +784,8 @@
 
             <div class="w-px h-5 bg-gray-300 mx-1 flex-shrink-0"></div>
 
-            <button class="toolbar-btn px-2 w-auto text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 flex-shrink-0" onmousedown="event.preventDefault()" onclick="applyMarkdown()">
-                M↓ 마크다운
+          <button class="toolbar-btn px-2 w-auto text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 flex-shrink-0" onmousedown="event.preventDefault()" onclick="applyMarkdownAndHTML()">
+                M↓ 마크다운 & HTML
             </button>
 
             <!-- 텍스트 치환 기능 -->
@@ -1170,7 +1251,12 @@
                 ratio: document.getElementById('imageRatio').value,
                 quoteStyle: document.getElementById('quoteStyle').value,
                 autoTrim: document.getElementById('autoTrim').checked,
-                downloadOrder: document.querySelector('input[name="dlOrder"]:checked') ? document.querySelector('input[name="dlOrder"]:checked').value : 'forward'
+                watermarkAuthor: document.getElementById('watermarkAuthor') ? document.getElementById('watermarkAuthor').value : '',
+                watermarkCharacter: document.getElementById('watermarkCharacter') ? document.getElementById('watermarkCharacter').value : '',
+                watermarkPos: document.getElementById('watermarkPos') ? document.getElementById('watermarkPos').value : 'right',
+                watermarkColor: document.getElementById('watermarkColor') ? document.getElementById('watermarkColor').value : 'auto',
+                watermarkFont: document.getElementById('watermarkFont') ? document.getElementById('watermarkFont').value : 'auto',
+                watermarkSize: document.getElementById('watermarkSize') ? document.getElementById('watermarkSize').value : '40'
             };
             localStorage.setItem('autoSavedSettings', JSON.stringify(settings));
         }
@@ -1328,24 +1414,26 @@
             document.execCommand('insertText', false, finalStr);
         }
 
-        function applyMarkdown() {
+        /* --- 통합: 마크다운 & HTML 렌더링 기능 --- */
+        function applyMarkdownAndHTML() {
             if (savedSelectionRange) {
                 const sel = window.getSelection();
                 sel.removeAllRanges();
                 sel.addRange(savedSelectionRange);
             }
-
             const sel = window.getSelection();
             if (!sel.rangeCount || sel.isCollapsed) {
-                alert("마크다운을 적용할 텍스트를 드래그하여 선택해주세요.");
+                alert("마크다운이나 HTML을 적용할 텍스트를 드래그하여 선택해주세요.");
                 return;
             }
 
             let rawText = sel.toString();
             if (!rawText.trim()) return;
 
+            // 1차: *기울임* 마크다운 수동 처리 (마크다운 파서 충돌 방지)
             rawText = rawText.replace(/\*(.*?)\*/g, '<em>$1</em>');
 
+            // 2차: marked.js로 파싱 (기본적으로 HTML 태그를 허용함)
             marked.setOptions({ breaks: true, gfm: true });
             let html = marked.parse(rawText);
             
@@ -1354,6 +1442,146 @@
 
             document.execCommand('insertHTML', false, html);
         }
+
+        /* --- 내용 유지: 폰트 및 색상 태그 전용 제거 --- */
+        function removeFontAndColorTags() {
+            const editor = document.getElementById('editor');
+            const clone = editor.cloneNode(true);
+            
+            // 1. 숨어들어온 <style> CSS 블록 통째로 삭제
+            const styleTags = clone.querySelectorAll('style');
+            styleTags.forEach(el => el.remove());
+
+            // 2. <font>, <span> 껍데기 태그 완벽 해체 (안의 텍스트만 꺼냄)
+            let wrapperTag = clone.querySelector('font, span');
+            while (wrapperTag) {
+                const frag = document.createDocumentFragment();
+                while(wrapperTag.firstChild) {
+                    frag.appendChild(wrapperTag.firstChild);
+                }
+                wrapperTag.parentNode.replaceChild(frag, wrapperTag);
+                wrapperTag = clone.querySelector('font, span');
+            }
+
+            // 3. 남은 문단/줄바꿈 구조 태그들에 붙어있는 스타일, 색상 속성 전부 날리기
+            const allElements = clone.querySelectorAll('*');
+            allElements.forEach(el => {
+                el.removeAttribute('style');
+                el.removeAttribute('color');
+                el.removeAttribute('face');
+                el.removeAttribute('size');
+                el.removeAttribute('class'); 
+            });
+            
+            // 4. 에디터에 덮어쓰기 (Ctrl+Z 실행 취소 지원)
+            editor.focus();
+            document.execCommand('selectAll', false, null);
+            document.execCommand('insertHTML', false, clone.innerHTML);
+        }
+            
+
+        /* --- 별/따옴표 세분화 제어 --- */
+        function modifyTextSpecific(action) {
+            const editor = document.getElementById('editor');
+            let rawText = editor.innerText;
+            if (!rawText.trim()) return;
+
+            let lines = rawText.split('\n');
+            let newLines = lines.map(line => {
+                let text = line.trim();
+                if (!text) return line;
+
+                switch(action) {
+                    case 'addOneStar':
+                        return '*' + text + '*';
+                    case 'removeOneStar':
+                        // 양끝에 별이 하나씩 있으면 제거
+                        if (text.startsWith('*') && text.endsWith('*')) {
+                            return text.substring(1, text.length - 1);
+                        }
+                        return text;
+                    case 'removeAllStar':
+                        return text.replace(/\*/g, '');
+                    case 'addOneQuote':
+                        return '"' + text + '"';
+                    case 'removeOneQuote':
+                        // 양끝의 따옴표 1쌍 제거
+                        if (/^["“”'‘’]/.test(text) && /["“”'‘’]$/.test(text)) {
+                            return text.substring(1, text.length - 1);
+                        }
+                        return text;
+                    case 'toggleDoubleQuote':
+                        if (text.includes('"')) {
+                            return text.replace(/"(.*?)"/g, '“$1”');
+                        } else {
+                            return text.replace(/[“”]/g, '"');
+                        }
+                    case 'toggleSingleQuote':
+                        if (text.includes("'")) {
+                            return text.replace(/'(.*?)'/g, '‘$1’');
+                        } else {
+                            return text.replace(/[‘’]/g, "'");
+                        }
+                    default:
+                        return text;
+                }
+            });
+
+            const finalString = newLines.join('\n');
+            editor.focus();
+            document.execCommand('selectAll', false, null);
+            document.execCommand('insertText', false, finalString);
+        }
+//* --- 워터마크 캔버스에 직접 그리기 --- */
+        function drawWatermarkOnCanvas(ctx, width, height) {
+            const author = document.getElementById('watermarkAuthor') ? document.getElementById('watermarkAuthor').value.trim() : '';
+            const charName = document.getElementById('watermarkCharacter') ? document.getElementById('watermarkCharacter').value.trim() : '';
+            
+            let wmText = "";
+            if(author && charName) wmText = `${author} | ${charName}`;
+            else if(author) wmText = author;
+            else if(charName) wmText = charName;
+
+            if(wmText) {
+                const wmColorVal = document.getElementById('watermarkColor') ? document.getElementById('watermarkColor').value : 'auto';
+                const wmFontVal = document.getElementById('watermarkFont') ? document.getElementById('watermarkFont').value : 'auto';
+                const wmPos = document.getElementById('watermarkPos') ? document.getElementById('watermarkPos').value : 'right';
+                // 사이즈 변수 추가
+                const wmSizeVal = document.getElementById('watermarkSize') ? document.getElementById('watermarkSize').value : '40';
+                
+                // 1. 색상 설정
+                let fillColor = wmColorVal === 'auto' ? currentTextColor : wmColorVal;
+                if(fillColor === "text-gray-400") fillColor = "#9ca3af";
+                if(fillColor === "text-gray-700") fillColor = "#374151";
+                if(fillColor === "text-black") fillColor = "#000000";
+                if(fillColor === "text-white") fillColor = "#ffffff";
+                
+                ctx.fillStyle = fillColor;
+                ctx.globalAlpha = 0.8;
+                
+                // 2. 폰트 및 크기 설정 (기존 40px 고정에서 선택한 사이즈로 변경)
+                let fontFamily = wmFontVal === 'auto' 
+                    ? document.getElementById('globalFont').value.split(',')[0].replace(/['"]/g, '')
+                    : wmFontVal.split(',')[0].replace(/['"]/g, '');
+                
+                ctx.font = `500 ${wmSizeVal}px '${fontFamily}', sans-serif`; 
+                
+                // 3. 여백 및 텍스트 렌더링
+                const paddingX = 45; 
+                const paddingY = 45; 
+                
+                ctx.textBaseline = "bottom";
+                if(wmPos === "right") {
+                    ctx.textAlign = "right";
+                    ctx.fillText(wmText, width - paddingX, height - paddingY);
+                } else {
+                    ctx.textAlign = "left";
+                    ctx.fillText(wmText, paddingX, height - paddingY);
+                }
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
 
         function execCmd(command, value = null) {
             if (savedSelectionRange && command !== 'undo' && command !== 'redo') {
@@ -1464,19 +1692,21 @@
             return "#" + r + g + b;
         }
 
-                            
- function generateAutoAnalogousColor() {
+                 function generateAutoAnalogousColor() {
             let hsl = hexToHSL(gradColor1);
             
-            // 색상(Hue)을 약간 이동하여 유사색을 만듦 (25도)
-            let newH = (hsl.h + 25) % 360;
+            // 색상(Hue)을 0도 ~ 25도 사이에서 랜덤하게 이동
+            let hueShift = Math.floor(Math.random() * 26); // 0 ~ 25 랜덤
+            let newH = (hsl.h + hueShift) % 360;
             
-            // 밝기(Lightness)를 올려 연하게 만듦 (최소 30% 이상)
-            let newL = Math.min(97, hsl.l + 25);
+            // 밝기(Lightness)를 15% ~ 30% 사이에서 랜덤하게 증가
+            let lightnessBoost = Math.floor(Math.random() * 16) + 15; // 15 ~ 30 랜덤
+            let newL = Math.min(97, hsl.l + lightnessBoost);
             if(newL < 30) newL = 30;
             
-            // 채도(Saturation)는 파스텔톤을 위해 살짝 조정
-            let newS = Math.max(15, hsl.s - 5);
+            // 채도(Saturation)를 0 ~ 5 사이에서 랜덤하게 감소 (-5 ~ 0)
+            let satDrop = Math.floor(Math.random() * 6); // 0 ~ 5 랜덤
+            let newS = Math.max(15, hsl.s - satDrop);
             
             let newHex = HSLToHex(newH, newS, newL);
             
@@ -1597,6 +1827,8 @@
                     ctx.fillRect(0, 0, width, totalHeight);
                     
                     ctx.drawImage(fullCanvas, 0, 0);
+
+                    drawWatermarkOnCanvas(ctx, width, totalHeight);
                     
                     const imgUrl = sliceCanvas.toDataURL("image/png", 1.0);
                     previewImages.push(imgUrl);
@@ -1683,7 +1915,9 @@
                             0, currentY, width, sliceHeightToDraw, 
                             0, drawOffsetY, width, sliceHeightToDraw
                         );
-                        
+
+                        drawWatermarkOnCanvas(ctx, width, ACTUAL_SLICE_HEIGHT);
+
                         const imgUrl = sliceCanvas.toDataURL("image/png", 1.0);
                         previewImages.push(imgUrl);
 
@@ -1875,6 +2109,21 @@
             applyCustomColor('text', preset.textColor || "#111111");
             
             toggleTexture();
+            
+           if(document.getElementById('watermarkAuthor')) {
+                document.getElementById('watermarkAuthor').value = preset.watermarkAuthor || '';
+                document.getElementById('watermarkCharacter').value = preset.watermarkCharacter || '';
+                document.getElementById('watermarkPos').value = preset.watermarkPos || 'right';
+                document.getElementById('watermarkColor').value = preset.watermarkColor || 'auto';
+                if (document.getElementById('watermarkFont')) {
+                    document.getElementById('watermarkFont').value = preset.watermarkFont || 'auto';
+                }
+                /* ▼ 아래 3줄 추가 ▼ */
+                if (document.getElementById('watermarkSize')) {
+                    document.getElementById('watermarkSize').value = preset.watermarkSize || '40';
+                }
+            }
+
             updateGlobalStyles();
         }
 

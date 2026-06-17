@@ -1501,7 +1501,7 @@
                         }
                         return text;
                     case 'removeAllStar':
-                        return text.replace(/\*/g, '');
+               return text.replace(/\*/g, '').replace(/\n+/g, ' ').trim();
                     case 'addOneQuote':
                         return '"' + text + '"';
                     case 'removeOneQuote':

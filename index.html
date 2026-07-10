@@ -92,6 +92,12 @@
     font-weight: 400;
     font-display: swap;
         }
+        @font-face {
+    font-family: 'Shouting';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2510-1@1.0/Callifont-Medium.woff2') format('woff2');
+    font-weight: normal;
+    font-display: swap;
+        }
 
         /* 스크롤바 */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -124,7 +130,7 @@
         
         #editor em { font-style: italic; opacity: 0.6; }
 
-        /* 들여쓰기 활성화 시 첫 줄 들여쓰기 0.5em 적용 */
+        
         #editor.indent-active { text-indent: 0.5em; }
         #editor.indent-active div, #editor.indent-active p { text-indent: 0.5em; }
 
@@ -341,6 +347,8 @@
                             <option value="'NeoDonggeunmo', sans-serif">네오둥근모</option>
                             <option value="'SchoolSafeStoneWall', sans-serif">학교안심 돌담</option>
                             <option value="'Yeongwol', sans-serif">영월체</option>
+                            <option value="'Shouting', sans-serif">샤우팅체</option>
+
                         </optgroup>
                     </select>
                 </div>
@@ -549,7 +557,7 @@
 
           <!-- 하단 서명 (워터마크) -->
             <div class="space-y-4">
-                <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1">출</h3>
+                <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1">출처</h3>
                 <div class="flex gap-2">
                     <div class="flex-1">
                         <label class="block text-[10px] text-gray-500 mb-1">제작자</label>
@@ -576,6 +584,7 @@
                             <option value="'NeoDonggeunmo', sans-serif">네오둥근모</option>
                             <option value="'SchoolSafeStoneWall', sans-serif">학교안심 돌담</option>
                             <option value="'Yeongwol', sans-serif">영월체</option>
+                            <option value="'Shouting', sans-serif">샤우팅체</option>
                         </select>
                     </div>
                     <div>
